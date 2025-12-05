@@ -9,7 +9,7 @@ Ce document décrit les heuristiques utilisées pour l'évaluation des coups dan
 | **Coup gagnant** | `JJJJ` | +10000 |
 | **3 alignés ouverts** | `JJJ_` | +15 |
 | **2 alignés ouverts** | `JJ__` | +5 |
-| **Position centrale** | Centre du plateau | +40 max |
+| **Position centrale** | Centre du plateau | +4 max |
 | **Cases jouables (60%)** | 60% vides | +1000 |
 | **Cases jouables (50%)** | 50% vides | +5 |
 | **Cases jouables (40%)** | 40% vides | +4 |
