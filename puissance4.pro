@@ -16,6 +16,7 @@ play(Player):-
 playMove(Board,Col,NewBoard,Player):-
     last_index(LastIndex),
     nth0(Col,LastIndex,Row),
+    Row < 6,                         
     replaceMatrix(Board,Row,Col, Player,NewBoard),
     NewRow is Row + 1,
     replace(LastIndex,Col,NewRow,NewLastIndex),
@@ -33,7 +34,7 @@ applyLastIndex(_OldLastIndex,NewLastIndex):-
 changePlayer('x', 'o').
 changePlayer('o', 'x').
 
-validMove(Board, Col) :-
+validMove(Col) :-
     Col >= 0,
     Col < 7,
     last_index(Indices),
@@ -53,7 +54,6 @@ init :-
     assert(last_index(Indices)),
     assert(board(Board)),
     play('x').
-
 
 get_item_2d(Matrix, Row, Col, Value) :- nth0(Row, Matrix, TheRow), nth0(Col, TheRow, Value).
 
@@ -104,32 +104,29 @@ game_over(Board, Result) :-
 available_moves(Board, Moves) :-
     findall(Col, (between(0,6,Col), get_item_2d(Board, 0, Col, '.')), Moves).
 
-%---- Player Move ----
-changePlayer('x', 'o').
-changePlayer('o', 'x').
-
 play_human_move(Board,NewBoard,Player) :-
+    repeat,
     write('Player '), write(Player), writeln(', choose a column (1-7): '),
     read(Col),
-    integer(Col),
-    Col >= 1, Col =< 7,
-    ColIndex is Col - 1,
-    last_index(Indices),
-    nth0(ColIndex, Indices, RowIndex),
-    write('Dropping in column '), writeln(Col),
-    RowIndex < 6,
-    replaceMatrix(Board, RowIndex, ColIndex, Player, NewBoard),
-    NewRowIndex is RowIndex + 1,
-    replace(Indices, ColIndex, NewRowIndex, NewIndices),
-    write('Updated Indices: '), writeln(NewIndices),
-    retractall(last_index(_)),
-    assert(last_index(NewIndices)),
-    game_over(NewBoard, Result),
-    (Result \= 'no' ->
-        (Result = 'draw' -> writeln('It\'s a draw!') ;
-         format('Player ~w wins!~n', [Result])),
-        fail ;
-        true).
+    (   integer(Col), Col >= 1, Col =< 7
+    ->  ColIndex is Col - 1,
+        (   playMove(Board, ColIndex, TmpBoard, Player)
+        ->  NewBoard = TmpBoard,
+            write('Dropping in column '), write(Col), nl,
+            last_index(UpdatedIdx),
+            write('Updated Indices: '), writeln(UpdatedIdx),
+            game_over(NewBoard, Result),
+            (Result \= 'no' ->
+                (Result = 'draw' -> writeln('It\'s a draw!') ;
+                 format('Player ~w wins!~n', [Result])),
+                fail ;
+                true)
+        ;   writeln('Column is full, pick another.'),
+            fail
+        )
+    ;   writeln('Invalid input, enter a number between 1 and 7.'),
+        fail
+    ).
 
 
 test_play_human_move :-
