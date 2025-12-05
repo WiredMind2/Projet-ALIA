@@ -83,7 +83,7 @@ play_human_move(Board,NewBoard,Player) :-
     read(Col),
     (   integer(Col), Col >= 1, Col =< 7
     ->  ColIndex is Col - 1,
-        (   validMove(Board, ColIndex)
+        (   validMove(ColIndex)
         ->  playMove(Board, ColIndex, TmpBoard, Player),
             NewBoard = TmpBoard,
             write('Dropping in column '), write(Col), nl,
