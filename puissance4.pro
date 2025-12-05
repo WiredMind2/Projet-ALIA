@@ -4,15 +4,26 @@
 :- consult('print.pro').
 :- consult('matrix.pro').
 
+iaRandom(Player, Board, NewBoard) :-
+    findall(Column, validMove(Column), ValidMoves),
+    random_member(ChosenColumn, ValidMoves),
+    playMove(Board, ChosenColumn, NewBoard, Player).
+
 play(Player):-  
     write('New turn for: '),
     writeln(Player),
     board(Board),
     print_board(Board),
-    playHumanMove(Board,NewBoard,Player),
+    playHumanMove(Board, NewBoard, Player),
     applyIt(Board, NewBoard),
-    changePlayer(Player,NextPlayer),
-    play(NextPlayer).
+    game_over(NewBoard, Result),
+    ( Result \= 'no' ->
+        ( Result = 'draw' -> writeln('It''s a draw!') ; format('Player ~w wins!~n', [Result]) ),
+        !
+    ;
+        changePlayer(Player,NextPlayer),
+        play(NextPlayer)
+    ).
 
 playMove(Board,Col,NewBoard,Player):-
     last_index(LastIndex),
@@ -36,8 +47,7 @@ changePlayer('x', 'o').
 changePlayer('o', 'x').
 
 validMove(Col) :-
-    Col >= 0,
-    Col < 7,
+    between(0,6,Col),
     last_index(Indices),
     nth0(Col, Indices, Row),
     Row < 6.
@@ -115,12 +125,7 @@ playHumanMove(Board,NewBoard,Player) :-
             write('Dropping in column '), write(Col), nl,
             last_index(UpdatedIdx),
             write('Updated Indices: '), writeln(UpdatedIdx),
-            game_over(NewBoard, Result),
-            (Result \= 'no' ->
-                (Result = 'draw' -> writeln('It\'s a draw!') ;
-                 format('Player ~w wins!~n', [Result])),
-                fail ;
-                true)
+            true
         ;   writeln('Column is full, pick another.'),
             playHumanMove(Board,NewBoard,Player)
         )
