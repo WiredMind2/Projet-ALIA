@@ -14,7 +14,7 @@ play(Player):-
     writeln(Player),
     board(Board),
     print_board(Board),
-    iaRandom(Player, Board, NewBoard),
+    playHumanMove(Board, NewBoard, Player),
     applyIt(Board, NewBoard),
     game_over(NewBoard, Result),
     ( Result \= 'no' ->
