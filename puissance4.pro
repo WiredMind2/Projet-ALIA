@@ -45,7 +45,7 @@ applyIt(OldBoard, NewBoard):-
 % ---- Board checking utilities ----
 
 print_cell(.) :-
-    write('. ').
+    write('.').
 
 print_cell(x) :- 
     ansi_format([fg(red)], 'O', []).
