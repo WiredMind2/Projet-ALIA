@@ -16,7 +16,7 @@ play(Player):-
     board(Board),
     print_board(Board),
     playHumanMove(Board, NewBoard, Player),
-    applyIt(Board, NewBoard),
+    applyBoard(Board, NewBoard),
     game_over(NewBoard, Result),
     ( Result \= 'no' ->
         ( Result = 'draw' -> writeln('It''s a draw!') ; format('Player ~w wins!~n', [Result]) ),
@@ -52,10 +52,6 @@ validMove(Col) :-
     last_index(Indices),
     nth0(Col, Indices, Row),
     Row < 6.
-
-applyIt(OldBoard, NewBoard):- 
-    retract(board(OldBoard)), 
-    assert(board(NewBoard)).
 
 setup :- 
     retractall(board(_)),
@@ -107,7 +103,7 @@ play_pvai(Player) :-  % Player 'x' = human, 'o' = IA
     ;
         iaRandom(Board, NewBoard, Player)
     ),
-    applyIt(Board, NewBoard),
+    applyBoard(Board, NewBoard),
     game_over(NewBoard, Result),
     ( Result \= 'no' ->
         ( Result = 'draw' -> writeln('It''s a draw!') ; format('Player ~w wins!~n', [Result]) )
@@ -121,7 +117,7 @@ play_aivai(Player) :-  % Player 'x' = IA, 'o' = IA
     board(Board),
     print_board(Board),
     iaRandom(Board, NewBoard, Player),
-    applyIt(Board, NewBoard),
+    applyBoard(Board, NewBoard),
     game_over(NewBoard, Result),
     ( Result \= 'no' ->
         ( Result = 'draw' -> writeln('It''s a draw!') ; format('Player ~w wins!~n', [Result]) )
