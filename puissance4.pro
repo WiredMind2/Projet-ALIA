@@ -66,9 +66,43 @@ init :-
     assert(board(Board)),
     play('x').
 
-changePlayer('A', 'B').
-changePlayer('B', 'A').
 
 applyIt(OldBoard, NewBoard):- 
     retract(board(OldBoard)), 
     assert(board(NewBoard)).
+
+
+%---- Player Move ----
+changePlayer('x', 'o').
+changePlayer('o', 'x').
+
+play_human_move(Board,NewBoard,Player) :-
+    write('Player '), write(Player), writeln(', choose a column (1-7): '),
+    read(Col),
+    integer(Col),
+    Col >= 1, Col =< 7,
+    ColIndex is Col - 1,
+    last_index(Indices),
+    nth0(ColIndex, Indices, RowIndex),
+    write('Dropping in column '), writeln(Col),
+    RowIndex < 6,
+    replaceMatrix(Board, RowIndex, ColIndex, Player, NewBoard),
+    NewRowIndex is RowIndex + 1,
+    replace(Indices, ColIndex, NewRowIndex, NewIndices),
+    write('Updated Indices: '), writeln(NewIndices),
+    retractall(last_index(_)),
+    assert(last_index(NewIndices)).
+    %Here should check for win condition.
+
+
+test_play_human_move :-
+    init,
+    board(Board),
+    print_board(Board),
+    play_human_move(Board, NewBoard, x),
+    applyIt(Board, NewBoard),
+    print_board(NewBoard),
+    board(UpdatedBoard), 
+    play_human_move(UpdatedBoard, NewBoard2, o),
+    applyIt(UpdatedBoard, NewBoard2),
+    print_board(NewBoard2).
