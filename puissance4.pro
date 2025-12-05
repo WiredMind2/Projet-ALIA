@@ -1,16 +1,16 @@
 :- dynamic board/1.
 :- dynamic last_index/1.
 
-% Puissance 4
+:- consult('print.pro').
 
 play(Player):-  
     write('New turn for: '),
     writeln(Player),
     board(Board),
-    print_board,
+    print_board(Board),
     replaceMatrix(Board, 0, 0, Player, NewBoard), % Placeholder for actual move logic
     applyIt(Board, NewBoard),
-    print_board.
+    print_board(NewBoard).
 
 length_list(N, List) :- length(List, N).
 
@@ -45,44 +45,3 @@ changePlayer('B', 'A').
 applyIt(OldBoard, NewBoard):- 
     retract(board(OldBoard)), 
     assert(board(NewBoard)).
-
-
-% ---- Board checking utilities ----
-
-print_cell(.) :-
-    write('.').
-
-print_cell(x) :- 
-    ansi_format([fg(red)], 'O', []).
-    
-print_cell(o) :- 
-    ansi_format([fg(yellow)], 'O', []).
-
-print_row([], N) :-
-    write(' '),
-    write(N),
-    writeln(' ').
-print_row([Cell|Rest], N) :-
-    print_cell(Cell), write(' '),
-    print_row(Rest, N).
-
-print_matrix([], 0).
-print_matrix([Row|Rest], N) :-
-    O is  N - 1,
-    print_matrix(Rest, O),
-    print_row(Row, N).
-    
-
-print_column_number(N, N) :- write(N), !.
-print_column_number(X, N) :-
-    X < N,
-    write(X),
-    write(' '),
-    X1 is X + 1,
-    print_column_number(X1, N).
-
-print_board :-
-    board(Board),
-    print_matrix(Board, 6),
-    print_column_number(1, 7),
-    nl.
