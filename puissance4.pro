@@ -68,9 +68,10 @@ print_row([Cell|Rest], N) :-
 
 print_matrix([], 0).
 print_matrix([Row|Rest], N) :-
-    print_row(Row, N),
     O is  N - 1,
-    print_matrix(Rest, O).
+    print_matrix(Rest, O),
+    print_row(Row, N).
+    
 
 print_column_number(N, N) :- write(N), !.
 print_column_number(X, N) :-
@@ -85,4 +86,3 @@ print_board :-
     print_matrix(Board, 6),
     print_column_number(1, 7),
     nl.
-
