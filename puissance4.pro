@@ -4,7 +4,7 @@
 :- consult('print.pro').
 :- consult('matrix.pro').
 
-iaRandom(Player, Board, NewBoard) :-
+iaRandom(Board, NewBoard, Player) :-
     findall(Column, validMove(Column), ValidMoves),
     random_member(ChosenColumn, ValidMoves),
     playMove(Board, ChosenColumn, NewBoard, Player).
