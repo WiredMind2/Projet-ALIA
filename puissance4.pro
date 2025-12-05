@@ -9,9 +9,10 @@ play(Player):-
     writeln(Player),
     board(Board),
     print_board(Board),
-    playMove(Board,0,NewBoard,Player),
-    applyBoard(Board, NewBoard),
-    print_board(NewBoard).
+    playHumanMove(Board,NewBoard,Player),
+    applyIt(Board, NewBoard),
+    changePlayer(Player,NextPlayer),
+    play(NextPlayer).
 
 playMove(Board,Col,NewBoard,Player):-
     last_index(LastIndex),
@@ -104,14 +105,13 @@ game_over(Board, Result) :-
 available_moves(Board, Moves) :-
     findall(Col, (between(0,6,Col), get_item_2d(Board, 0, Col, '.')), Moves).
 
-play_human_move(Board,NewBoard,Player) :-
-    repeat,
-    write('Player '), write(Player), writeln(', choose a column (1-7): '),
+playHumanMove(Board,NewBoard,Player) :-
     read(Col),
     (   integer(Col), Col >= 1, Col =< 7
     ->  ColIndex is Col - 1,
-        (   playMove(Board, ColIndex, TmpBoard, Player)
-        ->  NewBoard = TmpBoard,
+        (   validMove(ColIndex)
+        ->  playMove(Board, ColIndex, TmpBoard, Player),
+            NewBoard = TmpBoard,
             write('Dropping in column '), write(Col), nl,
             last_index(UpdatedIdx),
             write('Updated Indices: '), writeln(UpdatedIdx),
@@ -122,12 +122,11 @@ play_human_move(Board,NewBoard,Player) :-
                 fail ;
                 true)
         ;   writeln('Column is full, pick another.'),
-            fail
+            playHumanMove(Board,NewBoard,Player)
         )
     ;   writeln('Invalid input, enter a number between 1 and 7.'),
-        fail
+        playHumanMove(Board,NewBoard,Player)
     ).
-
 
 test_play_human_move :-
     init,
