@@ -33,9 +33,6 @@ applyLastIndex(_OldLastIndex,NewLastIndex):-
     retractall(last_index(_)),
     assert(last_index(NewLastIndex)).
 
-changePlayer('A', 'B').
-changePlayer('B', 'A').
-
 validMove(Board, Col) :-
     Col >= 0,
     Col < 7,
