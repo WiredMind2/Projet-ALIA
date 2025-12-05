@@ -78,8 +78,7 @@ main_menu :-
     writeln('Choose game mode:'),
     writeln('1 - Player vs Player'),
     writeln('2 - Player vs IA (you play first)'),
-    writeln('3 - IA vs Player (IA plays first)'),
-    writeln('4 - IA vs IA'),
+    writeln('3 - IA vs IA'),
     writeln('q - Quit'),
     read(Choice),
     handle_choice(Choice).
