@@ -36,6 +36,19 @@ test_print_board :-
     replaceMatrix(Board3, 1, 1, x, Board4),
     print_board(Board4).
 
+% Test de play_human_move
+test_play_human_move :-
+    init,
+    board(Board),
+    print_board(Board),
+    play_human_move(Board, NewBoard, x),
+    applyIt(Board, NewBoard),
+    print_board(NewBoard),
+    board(UpdatedBoard), 
+    play_human_move(UpdatedBoard, NewBoard2, o),
+    applyIt(UpdatedBoard, NewBoard2),
+    print_board(NewBoard2).
+
 % Test de init
 test_init :-
     init,
@@ -56,6 +69,7 @@ run_all_tests :-
     run_test('replaceMatrix', test_replace_matrix),
     run_test('print_board', test_print_board),
     run_test('init', test_init),
+    run_test('play_human_move', test_play_human_move),
     nl,
     writeln('========================================'),
     writeln('     TESTS TERMINES'),
