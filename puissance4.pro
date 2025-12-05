@@ -62,10 +62,6 @@ setup :-
     assert(last_index(Indices)),
     assert(board(Board)).
 
-init :-
-    setup,
-    play('x').
-
 start :-
     setup,
     main_menu.
