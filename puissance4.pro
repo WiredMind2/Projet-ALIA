@@ -64,7 +64,16 @@ print_matrix([Row|Rest], N) :-
     O is  N - 1,
     print_matrix(Rest, O).
 
+print_column_number(N, N) :- write(N), !.
+print_column_number(X, N) :-
+    X < N,
+    write(X),
+    write(' '),
+    X1 is X + 1,
+    print_column_number(X1, N).
+
 print_board :-
     board(Board),
-    print_matrix(Board, 6).
+    print_matrix(Board, 6),
+    print_column_number(1, 7).
 
