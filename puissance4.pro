@@ -8,9 +8,13 @@ play(Player):-
     writeln(Player),
     board(Board),
     print_board(Board),
-    replaceMatrix(Board, 0, 0, Player, NewBoard), % Placeholder for actual move logic
-    applyIt(Board, NewBoard),
-    print_board(NewBoard).
+    playMove(Board,0,NewBoard,Player),
+    applyBoard(Board, NewBoard),
+    print_board(NewBoard),
+    % continue using the updated board
+    playMove(NewBoard,0,NewBoard1,Player),
+    applyBoard(NewBoard, NewBoard1),
+    print_board(NewBoard1).
 
 length_list(N, List) :- length(List, N).
 
@@ -34,26 +38,19 @@ playMove(Board,Col,NewBoard,Player):-
     last_index(LastIndex),
     nth0(Col,LastIndex,Row),
     replaceMatrix(Board,Row,Col, Player,NewBoard),
-    NewRow is Row+1,
-    print(NewRow),
-    nl,
+    NewRow is Row + 1,
     replace(LastIndex,Col,NewRow,NewLastIndex),
-    nth0(Col,NewLastIndex,Row),
-    print(Row),
-    nl,
-    applyLastIndex(LastIndex,NewLastIndex),
-    last_index(LastIndex),
-    nth0(Col,LastIndex,Row),
-    print(Row),
-    nl.
+    applyLastIndex(LastIndex,NewLastIndex).
 
 
-applyBoard(Board,NewBoard):-
-    retract(board(Board)),
+applyBoard(_OldBoard,NewBoard):-
+    % replace the stored board unconditionally
+    retractall(board(_)),
     assert(board(NewBoard)).
 
-applyLastIndex(LastIndex,NewLastIndex):-
-    retract(last_index(LastIndex)),
+applyLastIndex(_OldLastIndex,NewLastIndex):-
+    % replace the stored last_index unconditionally
+    retractall(last_index(_)),
     assert(last_index(NewLastIndex)).
 
 init :- 
