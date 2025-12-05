@@ -34,7 +34,7 @@ applyLastIndex(_OldLastIndex,NewLastIndex):-
     retractall(last_index(_)),
     assert(last_index(NewLastIndex)).
 
-validMove(Board, Col) :-
+validMove(Col) :-
     Col >= 0,
     Col < 7,
     last_index(Indices),
