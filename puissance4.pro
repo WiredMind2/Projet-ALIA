@@ -4,12 +4,17 @@
 :- consult('print.pro').
 :- consult('matrix.pro').
 
+iaRandom(Player, Board, NewBoard) :-
+    findall(Column, validMove(Column), ValidMoves),
+    random_member(ChosenColumn, ValidMoves),
+    playMove(Board, ChosenColumn, NewBoard, Player).
+
 play(Player):-  
     write('New turn for: '),
     writeln(Player),
     board(Board),
     print_board(Board),
-    playHumanMove(Board,NewBoard,Player),
+    iaRandom(Player, Board, NewBoard),
     applyIt(Board, NewBoard),
     changePlayer(Player,NextPlayer),
     play(NextPlayer).
@@ -33,8 +38,7 @@ applyLastIndex(_OldLastIndex,NewLastIndex):-
     assert(last_index(NewLastIndex)).
 
 validMove(Col) :-
-    Col >= 0,
-    Col < 7,
+    between(0,6,Col),
     last_index(Indices),
     nth0(Col, Indices, Row),
     Row < 6.
