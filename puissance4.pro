@@ -3,11 +3,21 @@
 
 % Puissance 4
 
+play(Player):-  
+    write('New turn for: '),
+    writeln(Player),
+    board(Board),
+    print_board,
+    replaceMatrix(Board, 0, 0, Player, NewBoard), % Placeholder for actual move logic
+    applyIt(Board, NewBoard),
+    print_board.
+
 length_list(N, List) :- length(List, N).
 
 generate_matrix(Cols, Rows, Matrix) :-
     length_list(Rows, Matrix),
-    maplist(length_list(Cols), Matrix).
+    maplist(length_list(Cols), Matrix),
+    maplist(maplist(=(.)), Matrix).
 
 replace([_|T], 0, X, [X|T]).
 replace([H|T], I, X, [H|R]) :-
@@ -20,19 +30,14 @@ replaceMatrix(Matrix, RowIndex, ColIndex, Player, NewMatrix) :-
     replace(OldRow, ColIndex, Player, NewRow),
     replace(Matrix, RowIndex, NewRow, NewMatrix).
 
-testReplace :-
-    generate_matrix(7,6,Board),
-    replaceMatrix(Board, 0, 0, 'A', NewBoard),
-    replaceMatrix(NewBoard, 1, 0, 'B', NewBoard2),
-    print_matrix(NewBoard2).
-
 init :- 
     retractall(board(_)),
     retractall(last_index(_)),
     generate_matrix(7,6,Board),
     length_list(7, Indices),
     assert(last_index(Indices)),
-    assert(board(Board)).
+    assert(board(Board)),
+    play('x').
 
 changePlayer('A', 'B').
 changePlayer('B', 'A').
@@ -78,5 +83,6 @@ print_column_number(X, N) :-
 print_board :-
     board(Board),
     print_matrix(Board, 6),
-    print_column_number(1, 7).
+    print_column_number(1, 7),
+    nl.
 
