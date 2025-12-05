@@ -30,6 +30,20 @@ replaceMatrix(Matrix, RowIndex, ColIndex, Player, NewMatrix) :-
     replace(OldRow, ColIndex, Player, NewRow),
     replace(Matrix, RowIndex, NewRow, NewMatrix).
 
+changePlayer('A', 'B').
+changePlayer('B', 'A').
+
+validMove(Board, Col) :-
+    Col >= 0,
+    Col < 7,
+    last_index(Indices),
+    nth0(Col, Indices, Row),
+    Row < 6.
+
+applyIt(OldBoard, NewBoard):- 
+    retract(board(OldBoard)), 
+    assert(board(NewBoard)).
+
 init :- 
     retractall(board(_)),
     retractall(last_index(_)),
@@ -38,10 +52,3 @@ init :-
     assert(last_index(Indices)),
     assert(board(Board)),
     play('x').
-
-changePlayer('A', 'B').
-changePlayer('B', 'A').
-
-applyIt(OldBoard, NewBoard):- 
-    retract(board(OldBoard)), 
-    assert(board(NewBoard)).
