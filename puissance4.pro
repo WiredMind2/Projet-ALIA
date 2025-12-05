@@ -78,7 +78,7 @@ main_menu :-
     writeln('Choose game mode:'),
     writeln('1 - Player vs Player'),
     writeln('2 - Player vs IA (you play first)'),
-    writeln('3 - IA vs Player (IA plays first)'),
+    writeln('3 - IA vs IA'),
     writeln('q - Quit'),
     read(Choice),
     handle_choice(Choice).
@@ -90,8 +90,8 @@ handle_choice(2) :-
     write('Starting Player vs IA (you are x)...'), nl,
     play_pvai('x').
 handle_choice(3) :-
-    write('Starting IA vs Player (IA is x)...'), nl,
-    play_iavp('x').
+    write('Starting IA vs IA...'), nl,
+    play_aivai('x').
 handle_choice(q) :-
     writeln('Goodbye.').
 handle_choice(_) :-
@@ -116,22 +116,18 @@ play_pvai(Player) :-  % Player 'x' = human, 'o' = IA
         play_pvai(NextPlayer)
     ).
 
-play_iavp(Player) :-  % Player 'x' = IA, 'o' = human
+play_aivai(Player) :-  % Player 'x' = IA, 'o' = IA
     write('New turn for: '), writeln(Player),
     board(Board),
     print_board(Board),
-    ( Player = 'x' ->
-        iaRandom(Board, NewBoard, Player)
-    ;
-        playHumanMove(Board, NewBoard, Player)
-    ),
+    iaRandom(Board, NewBoard, Player),
     applyIt(Board, NewBoard),
     game_over(NewBoard, Result),
     ( Result \= 'no' ->
         ( Result = 'draw' -> writeln('It''s a draw!') ; format('Player ~w wins!~n', [Result]) )
     ;
         changePlayer(Player,NextPlayer),
-        play_iavp(NextPlayer)
+        play_aivai(NextPlayer)
     ).
 
 playHumanMove(Board,NewBoard,Player) :-
