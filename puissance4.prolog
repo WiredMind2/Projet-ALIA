@@ -17,9 +17,16 @@ init :-
 
 print_matrix([]).
 print_matrix([Row|Rest]) :-
-    writeln(Row),
+    print_row(Row),
     print_matrix(Rest).
+
 
 print_board :-
     board(Board),
     print_matrix(Board).
+
+
+
+% ---- Player utilities ----
+changePlayer('x','o').
+changePlayer('o','x').
