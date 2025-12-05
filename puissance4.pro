@@ -11,7 +11,6 @@ play(Player):-
     playMove(Board,0,NewBoard,Player),
     applyBoard(Board, NewBoard),
     print_board(NewBoard),
-    % continue using the updated board
     playMove(NewBoard,0,NewBoard1,Player),
     applyBoard(NewBoard, NewBoard1),
     print_board(NewBoard1).
@@ -44,12 +43,10 @@ playMove(Board,Col,NewBoard,Player):-
 
 
 applyBoard(_OldBoard,NewBoard):-
-    % replace the stored board unconditionally
     retractall(board(_)),
     assert(board(NewBoard)).
 
 applyLastIndex(_OldLastIndex,NewLastIndex):-
-    % replace the stored last_index unconditionally
     retractall(last_index(_)),
     assert(last_index(NewLastIndex)).
 
