@@ -11,10 +11,7 @@ play(Player):-
     print_board(Board),
     playMove(Board,0,NewBoard,Player),
     applyBoard(Board, NewBoard),
-    print_board(NewBoard),
-    playMove(NewBoard,0,NewBoard1,Player),
-    applyBoard(NewBoard, NewBoard1),
-    print_board(NewBoard1).
+    print_board(NewBoard).
 
 playMove(Board,Col,NewBoard,Player):-
     last_index(LastIndex),
@@ -33,8 +30,8 @@ applyLastIndex(_OldLastIndex,NewLastIndex):-
     retractall(last_index(_)),
     assert(last_index(NewLastIndex)).
 
-changePlayer('A', 'B').
-changePlayer('B', 'A').
+changePlayer('x', 'o').
+changePlayer('o', 'x').
 
 validMove(Board, Col) :-
     Col >= 0,
@@ -57,10 +54,6 @@ init :-
     assert(board(Board)),
     play('x').
 
-
-applyIt(OldBoard, NewBoard):- 
-    retract(board(OldBoard)), 
-    assert(board(NewBoard)).
 
 get_item_2d(Matrix, Row, Col, Value) :- nth0(Row, Matrix, TheRow), nth0(Col, TheRow, Value).
 
@@ -130,8 +123,13 @@ play_human_move(Board,NewBoard,Player) :-
     replace(Indices, ColIndex, NewRowIndex, NewIndices),
     write('Updated Indices: '), writeln(NewIndices),
     retractall(last_index(_)),
-    assert(last_index(NewIndices)).
-    %Here should check for win condition.
+    assert(last_index(NewIndices)),
+    game_over(NewBoard, Result),
+    (Result \= 'no' ->
+        (Result = 'draw' -> writeln('It\'s a draw!') ;
+         format('Player ~w wins!~n', [Result])),
+        fail ;
+        true).
 
 
 test_play_human_move :-
