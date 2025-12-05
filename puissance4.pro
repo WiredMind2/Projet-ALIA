@@ -55,6 +55,10 @@ init :-
     assert(board(Board)),
     play('x').
 
+
+
+
+
 %---- Player Move ----
 changePlayer('x', 'o').
 changePlayer('o', 'x').
@@ -65,8 +69,9 @@ play_human_move(Board,NewBoard,Player) :-
     read(Col),
     (   integer(Col), Col >= 1, Col =< 7
     ->  ColIndex is Col - 1,
-        (   playMove(Board, ColIndex, TmpBoard, Player)
-        ->  NewBoard = TmpBoard,
+        (   validMove(Board, ColIndex)
+        ->  playMove(Board, ColIndex, TmpBoard, Player),
+            NewBoard = TmpBoard,
             write('Dropping in column '), write(Col), nl,
             last_index(UpdatedIdx),
             write('Updated Indices: '), writeln(UpdatedIdx),
