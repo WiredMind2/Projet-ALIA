@@ -16,8 +16,14 @@ play(Player):-
     print_board(Board),
     iaRandom(Player, Board, NewBoard),
     applyIt(Board, NewBoard),
-    changePlayer(Player,NextPlayer),
-    play(NextPlayer).
+    game_over(NewBoard, Result),
+    ( Result \= 'no' ->
+        ( Result = 'draw' -> writeln('It''s a draw!') ; format('Player ~w wins!~n', [Result]) ),
+        !
+    ;
+        changePlayer(Player,NextPlayer),
+        play(NextPlayer)
+    ).
 
 playMove(Board,Col,NewBoard,Player):-
     last_index(LastIndex),
@@ -119,12 +125,7 @@ playHumanMove(Board,NewBoard,Player) :-
             write('Dropping in column '), write(Col), nl,
             last_index(UpdatedIdx),
             write('Updated Indices: '), writeln(UpdatedIdx),
-            game_over(NewBoard, Result),
-            (Result \= 'no' ->
-                (Result = 'draw' -> writeln('It\'s a draw!') ;
-                 format('Player ~w wins!~n', [Result])),
-                fail ;
-                true)
+            true
         ;   writeln('Column is full, pick another.'),
             playHumanMove(Board,NewBoard,Player)
         )
