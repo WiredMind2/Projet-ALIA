@@ -30,11 +30,38 @@ replaceMatrix(Matrix, RowIndex, ColIndex, Player, NewMatrix) :-
     replace(OldRow, ColIndex, Player, NewRow),
     replace(Matrix, RowIndex, NewRow, NewMatrix).
 
+playMove(Board,Col,NewBoard,Player):-
+    last_index(LastIndex),
+    nth0(Col,LastIndex,Row),
+    replaceMatrix(Board,Row,Col, Player,NewBoard),
+    NewRow is Row+1,
+    print(NewRow),
+    nl,
+    replace(LastIndex,Col,NewRow,NewLastIndex),
+    nth0(Col,NewLastIndex,Row),
+    print(Row),
+    nl,
+    applyLastIndex(LastIndex,NewLastIndex),
+    last_index(LastIndex),
+    nth0(Col,LastIndex,Row),
+    print(Row),
+    nl.
+
+
+applyBoard(Board,NewBoard):-
+    retract(board(Board)),
+    assert(board(NewBoard)).
+
+applyLastIndex(LastIndex,NewLastIndex):-
+    retract(last_index(LastIndex)),
+    assert(last_index(NewLastIndex)).
+
 init :- 
     retractall(board(_)),
     retractall(last_index(_)),
     generate_matrix(7,6,Board),
     length_list(7, Indices),
+    maplist(=(0), Indices),
     assert(last_index(Indices)),
     assert(board(Board)),
     play('x').
