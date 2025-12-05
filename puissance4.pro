@@ -57,12 +57,6 @@ init :-
     assert(board(Board)),
     play('x').
 
-
-applyIt(OldBoard, NewBoard):- 
-    retract(board(OldBoard)), 
-    assert(board(NewBoard)).
-
-
 %---- Player Move ----
 changePlayer('x', 'o').
 changePlayer('o', 'x').
