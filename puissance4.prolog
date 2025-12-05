@@ -15,11 +15,26 @@ init :-
 
 % ---- Board checking utilities ----
 
-print_matrix([]).
-print_matrix([Row|Rest]) :-
-    writeln(Row),
-    print_matrix(Rest).
+print_cell(x) :- 
+    ansi_format([fg(red)], 'O', []).
+    
+print_cell(o) :- 
+    ansi_format([fg(yellow)], 'O', []).
+
+print_row([], N) :-
+    write(' '),
+    write(N),
+    writeln(' ').
+print_row([Cell|Rest], N) :-
+    print_cell(Cell), write(' '),
+    print_row(Rest, N).
+
+print_matrix([], 0).
+print_matrix([Row|Rest], N) :-
+    print_row(Row, N),
+    O is  N - 1,
+    print_matrix(Rest, O).
 
 print_board :-
     board(Board),
-    print_matrix(Board).
+    print_matrix(Board, 6).
