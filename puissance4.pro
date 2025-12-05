@@ -36,6 +36,7 @@ replaceMatrix(Matrix, RowIndex, ColIndex, Player, NewMatrix) :-
 playMove(Board,Col,NewBoard,Player):-
     last_index(LastIndex),
     nth0(Col,LastIndex,Row),
+    Row < 6,                         
     replaceMatrix(Board,Row,Col, Player,NewBoard),
     NewRow is Row + 1,
     replace(LastIndex,Col,NewRow,NewLastIndex),
@@ -71,21 +72,23 @@ changePlayer('x', 'o').
 changePlayer('o', 'x').
 
 play_human_move(Board,NewBoard,Player) :-
+    repeat,
     write('Player '), write(Player), writeln(', choose a column (1-7): '),
     read(Col),
-    integer(Col),
-    Col >= 1, Col =< 7,
-    ColIndex is Col - 1,
-    last_index(Indices),
-    nth0(ColIndex, Indices, RowIndex),
-    write('Dropping in column '), writeln(Col),
-    RowIndex < 6,
-    replaceMatrix(Board, RowIndex, ColIndex, Player, NewBoard),
-    NewRowIndex is RowIndex + 1,
-    replace(Indices, ColIndex, NewRowIndex, NewIndices),
-    write('Updated Indices: '), writeln(NewIndices),
-    retractall(last_index(_)),
-    assert(last_index(NewIndices)).
+    (   integer(Col), Col >= 1, Col =< 7
+    ->  ColIndex is Col - 1,
+        (   playMove(Board, ColIndex, TmpBoard, Player)
+        ->  NewBoard = TmpBoard,
+            write('Dropping in column '), write(Col), nl,
+            last_index(UpdatedIdx),
+            write('Updated Indices: '), writeln(UpdatedIdx),
+            !
+        ;   writeln('Column is full, pick another.'),
+            fail
+        )
+    ;   writeln('Invalid input, enter a number between 1 and 7.'),
+        fail
+    ).
     %Here should check for win condition.
 
 
