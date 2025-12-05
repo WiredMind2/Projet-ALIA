@@ -57,15 +57,82 @@ applyIt(OldBoard, NewBoard):-
     retract(board(OldBoard)), 
     assert(board(NewBoard)).
 
-init :- 
+setup :- 
     retractall(board(_)),
     retractall(last_index(_)),
     generate_matrix(7,6,Board),
     length_list(7, Indices),
     maplist(=(0), Indices),
     assert(last_index(Indices)),
-    assert(board(Board)),
+    assert(board(Board)).
+
+init :-
+    setup,
     play('x').
+
+start :-
+    setup,
+    main_menu.
+
+main_menu :-
+    writeln('Choose game mode:'),
+    writeln('1 - Player vs Player'),
+    writeln('2 - Player vs IA (you play first)'),
+    writeln('3 - IA vs Player (IA plays first)'),
+    writeln('q - Quit'),
+    read(Choice),
+    handle_choice(Choice).
+
+handle_choice(1) :-
+    write('Starting Player vs Player...'), nl,
+    play('x').
+handle_choice(2) :-
+    write('Starting Player vs IA (you are x)...'), nl,
+    play_pvai('x').
+handle_choice(3) :-
+    write('Starting IA vs Player (IA is x)...'), nl,
+    play_iavp('x').
+handle_choice(q) :-
+    writeln('Goodbye.').
+handle_choice(_) :-
+    writeln('Invalid choice, try again.'),
+    main_menu.
+
+play_pvai(Player) :-  % Player 'x' = human, 'o' = IA
+    write('New turn for: '), writeln(Player),
+    board(Board),
+    print_board(Board),
+    ( Player = 'x' ->
+        playHumanMove(Board, NewBoard, Player)
+    ;
+        iaRandom(Board, NewBoard, Player)
+    ),
+    applyIt(Board, NewBoard),
+    game_over(NewBoard, Result),
+    ( Result \= 'no' ->
+        ( Result = 'draw' -> writeln('It''s a draw!') ; format('Player ~w wins!~n', [Result]) )
+    ;
+        changePlayer(Player,NextPlayer),
+        play_pvai(NextPlayer)
+    ).
+
+play_iavp(Player) :-  % Player 'x' = IA, 'o' = human
+    write('New turn for: '), writeln(Player),
+    board(Board),
+    print_board(Board),
+    ( Player = 'x' ->
+        iaRandom(Board, NewBoard, Player)
+    ;
+        playHumanMove(Board, NewBoard, Player)
+    ),
+    applyIt(Board, NewBoard),
+    game_over(NewBoard, Result),
+    ( Result \= 'no' ->
+        ( Result = 'draw' -> writeln('It''s a draw!') ; format('Player ~w wins!~n', [Result]) )
+    ;
+        changePlayer(Player,NextPlayer),
+        play_iavp(NextPlayer)
+    ).
 
 playHumanMove(Board,NewBoard,Player) :-
     read(Col),
@@ -84,15 +151,3 @@ playHumanMove(Board,NewBoard,Player) :-
     ;   writeln('Invalid input, enter a number between 1 and 7.'),
         playHumanMove(Board,NewBoard,Player)
     ).
-
-test_play_human_move :-
-    init,
-    board(Board),
-    print_board(Board),
-    play_human_move(Board, NewBoard, x),
-    applyIt(Board, NewBoard),
-    print_board(NewBoard),
-    board(UpdatedBoard), 
-    play_human_move(UpdatedBoard, NewBoard2, o),
-    applyIt(UpdatedBoard, NewBoard2),
-    print_board(NewBoard2).
