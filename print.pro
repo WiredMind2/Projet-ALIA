@@ -1,9 +1,9 @@
 print_cell(.) :-
     write('.').
 print_cell(x) :- 
-    ansi_format([fg(red)], 'O', []).
+    ansi_format([fg(red)], 'o', []).
 print_cell(o) :- 
-    ansi_format([fg(yellow)], 'O', []).
+    ansi_format([fg(yellow)], 'o', []).
 
 print_row([], N) :-
     write(' '),
