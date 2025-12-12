@@ -6,30 +6,66 @@
 :- consult('win.pro').
 :- consult('ai_selector.pro').
 
-% Minimax AI implementation
+% Random AI implementation
+iaRandom(Board, NewBoard, Player) :-
+    findall(Column, validMove(Column), ValidMoves),
+    ValidMoves \= [],
+    length(ValidMoves, Len),
+    random(0, Len, Index),
+    nth0(Index, ValidMoves, ChosenColumn),
+    playMove(Board, ChosenColumn, NewBoard, Player).
+
+% Minimax AI implementation with limited depth
 iaMinimax(Board, NewBoard, Player) :-
-    minimax(Board, 1, Player, BestCol, _),
-    playMove(Board, BestCol, NewBoard, Player).
+    write('Minimax thinking...'), nl,
+    minimax(Board, 2, Player, BestCol, Score),
+    format('Minimax chose column ~w with score ~w~n', [BestCol, Score]),
+    (   BestCol >= 0, BestCol =< 6
+    ->  playMove(Board, BestCol, NewBoard, Player)
+    ;   writeln('Minimax failed, using random move'),
+        iaRandom(Board, NewBoard, Player)
+    ).
 
 minimax(Board, Depth, Player, BestCol, Score) :-
-    (Depth =< 0 ; (game_over(Board, Result), Result \= 'no')) ->
-    evaluate(Board, Player, Score), BestCol = -1.
-
-minimax(Board, Depth, Player, BestCol, Score) :-
-    findall(Col, validMove(Col), ValidMoves),
-    ValidMoves \= [] ->
-    changePlayer(Player, Opponent),
-    NewDepth is Depth - 1,
-    findall(Score-Col, (member(Col, ValidMoves), simulateMove(Board, Col, NewBoard, Player), minimax(NewBoard, NewDepth, Opponent, _, OppScore), Score is -OppScore), ScoresCols),
-    sort(ScoresCols, Sorted), last(Sorted, Score-BestCol).
+    (   (Depth =< 0 ; (game_over(Board, Result), Result \= 'no'))
+    ->  evaluate(Board, Player, Score), BestCol = -1
+    ;   findall(Col, validMove(Col), ValidMoves),
+        ValidMoves \= [],
+        changePlayer(Player, Opponent),
+        NewDepth is Depth - 1,
+        findall(S-Col, (
+            member(Col, ValidMoves), 
+            simulateMove(Board, Col, NewBoard, Player), 
+            minimax(NewBoard, NewDepth, Opponent, _, OppScore), 
+            S is -OppScore
+        ), ScoresCols),
+        sort(ScoresCols, Sorted), 
+        last(Sorted, Score-BestCol)
+    ).
 
 evaluate(Board, Player, Score) :-
-    game_over(Board, Result),
     changePlayer(Player, Opponent),
-    ( Result == Player -> Score = 10000
-    ; Result == Opponent -> Score = -10000
-    ; Result == 'draw' -> Score = 0
-    ; Score = 0
+    game_over(Board, Result),
+    (   Result == Player -> 
+        Score = 10000
+    ;   Result == Opponent -> 
+        Score = -10000
+    ;   Result == 'draw' -> 
+        Score = 0
+    ;   % Partie non terminée : utiliser les heuristiques
+        % Score du joueur actuel (positif)
+        count_open3(Board, Player, MyOpen3),
+        count_open2(Board, Player, MyOpen2),
+        center_score(Board, Player, MyCenter),
+        
+        % Score de l'adversaire (négatif)
+        count_open3(Board, Opponent, OppOpen3),
+        count_open2(Board, Opponent, OppOpen2),
+        center_score(Board, Opponent, OppCenter),
+        
+        % Calcul du score total
+        Score is (MyOpen3 * 15 + MyOpen2 * 5 + MyCenter) - 
+                 (OppOpen3 * 15 + OppOpen2 * 5 + OppCenter)
     ).
 
 simulateMove(Board, Col, NewBoard, Player) :-
@@ -132,7 +168,7 @@ handle_choice(1) :-
     play('x').
 handle_choice(2) :-
     write('Starting Player vs IA...'), nl,
-    get_ai_for_player('o', AI),
+    get_ai_for_player('x', AI),
     play_pvai(AI, 'x').
 handle_choice(3) :-
     write('Starting IA vs IA...'), nl,

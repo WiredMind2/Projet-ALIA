@@ -1,3 +1,5 @@
+
+
 iaRandom(Board, NewBoard, Player) :-
     findall(Column, validMove(Column), ValidMoves),
     ValidMoves \= [],
