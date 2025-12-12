@@ -38,8 +38,3 @@ win(Board, M) :-
      diagonal1_win(Board, M) ;
      diagonal2_win(Board, M)),
     M \= '.'.
-
-game_over(Board, Result) :-
-    (win(Board, M) -> Result = M ;
-     (\+ (member(Row, Board), member('.', Row)) -> Result = 'draw' ;
-      Result = 'no')).

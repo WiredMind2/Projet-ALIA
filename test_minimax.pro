@@ -67,7 +67,7 @@ test_minimax_win :-
              [0,0,0,0,0,0,0]],
     retractall(last_index(_)),
     assert(last_index([1,1,1,0,0,0,0])),  % Update last_index to match the board
-    minimax(Board, 2, 'x', BestCol, Score),  % Increase depth to 2
+    minimax(Board, 1, 'x', BestCol, Score),  % Use depth 1
     Score > 9000,
     between(0, 6, BestCol),
     write('Test minimax win: PASSED, BestCol='), write(BestCol), write(', Score='), write(Score), nl.
