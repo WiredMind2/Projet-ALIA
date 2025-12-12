@@ -1,15 +1,16 @@
 :- consult('game.pro').
 :- consult('modes.pro').
+:- consult('tournament.pro').
 
 start :-
     setup,
     main_menu.
-
 main_menu :-
     writeln('Choose game mode:'),
     writeln('1 - Player vs Player'),
     writeln('2 - Player vs IA (you play first)'),
     writeln('3 - IA vs IA'),
+    writeln('4 - Run Tournament'),
     writeln('q - Quit'),
     read(Choice),
     handle_choice(Choice).
@@ -31,6 +32,12 @@ handle_choice(3) :-
     (   catch(play_aivai('x'), Error, (handle_error(Error), fail))
     ->  true
     ;   writeln('Game ended unexpectedly.'), main_menu
+    ).
+handle_choice(4) :-
+    write('Starting Tournament...'), nl,
+    (   catch(run_tournament('tournament_config.pl'), Error, (handle_error(Error), fail))
+    ->  main_menu
+    ;   writeln('Tournament ended unexpectedly.'), main_menu
     ).
 handle_choice(q) :-
     writeln('Goodbye.').
