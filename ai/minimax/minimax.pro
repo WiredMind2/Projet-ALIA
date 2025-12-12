@@ -1,6 +1,5 @@
-% Complete Minimax AI implementation with configurable depth and comprehensive logging
-% This module contains the full minimax algorithm with depth-based limiting and extensive logging
-% Replaces timeout-based approach to ensure consistent AI quality
+% Complete Minimax AI implementation with beam search (top 5 moves) and logging
+% This module contains the full minimax algorithm with enhanced logging and beam search optimization
 
 :- consult('../game_utils.pro').
 :- consult('../evaluation.pro').
@@ -164,7 +163,7 @@ get_middlegame_depth(4).  % Standard depth for midgame
 get_endgame_depth(6).     % Deeper search in endgame when fewer pieces remain
 
 % =============================================================================
-% ENHANCED MINIMAX WITH LOGGING
+% ENHANCED MINIMAX WITH LOGGING AND BEAM SEARCH
 % =============================================================================
 
 % Main entry point for Minimax AI with configurable depth and logging
@@ -173,86 +172,105 @@ minimax_ai(Board, NewBoard, Player) :-
     info_log('Starting minimax AI with depth ~w', [Depth]),
     start_performance_timing,
     reset_counters,
-    minimax(Board, Depth, Player, BestCol, _),
-    end_performance_timing,
-    (BestCol >= 0 ->
-        % Valid move found - make the move
-        playMove(Board, BestCol, NewBoard, Player),
-        info_log('AI made move in column ~w', [BestCol])
-    ;
-        % No valid move (game over or no moves available)
-        NewBoard = Board,
-        info_log('AI cannot make a move (BestCol = ~w)', [BestCol])
+    
+    % 1. Vérifier si on peut gagner immédiatement
+    (   find_winning_move(Board, Player, WinCol)
+    ->  playMove(Board, WinCol, NewBoard, Player),
+        info_log('Found immediate winning move in column ~w', [WinCol])
+    % 2. Vérifier si on doit bloquer l'adversaire
+    ;   changePlayer(Player, Opponent),
+        find_winning_move(Board, Opponent, BlockCol)
+    ->  playMove(Board, BlockCol, NewBoard, Player),
+        info_log('Found blocking move in column ~w', [BlockCol])
+    % 3. Sinon, utiliser minimax
+    ;   minimax(Board, Depth, Player, BestCol, _),
+        (   BestCol >= 0, BestCol =< 6
+        ->  playMove(Board, BestCol, NewBoard, Player),
+            info_log('AI made strategic move in column ~w', [BestCol])
+        ;   random_ai:random_ai(Board, NewBoard, Player),
+            info_log('AI made random move (no good moves found)', [])
+        )
     ),
+    
+    end_performance_timing,
     % Log final statistics
     minimax_calls(CallCount),
     minimax_positions_evaluated(PositionCount),
-    info_log('AI completed: Best column ~w, ~w calls, ~w positions evaluated',
-             [BestCol, CallCount, PositionCount]).
+    info_log('AI completed: ~w calls, ~w positions evaluated', [CallCount, PositionCount]).
+
+% Trouve un coup gagnant pour le joueur (si il existe)
+find_winning_move(Board, Player, WinningCol) :-
+    validMove(Col),
+    simulateMove(Board, Col, NewBoard, Player),
+    game_over(NewBoard, Result),
+    Result == Player,
+    WinningCol = Col,
+    !. % Premier coup gagnant trouvé
 
 % Base case: depth limit reached
 minimax(Board, Depth, Player, BestCol, Score) :-
     Depth =< 0,
-    !,  % Cut to prevent backtracking
+    !,
     increment_position_counter,
     evaluate(Board, Player, Score), 
-    BestCol = -1,
-    debug_log('Depth limit reached: Score = ~w', [Score]).
+    BestCol = -1.
 
 % Base case: game is over
 minimax(Board, _Depth, Player, BestCol, Score) :-
     game_over(Board, Result), 
     Result \= 'no',
-    !,  % Cut to prevent backtracking
+    !,
     increment_position_counter,
     evaluate(Board, Player, Score), 
-    BestCol = -1,
-    (Result = 'x' -> debug_log('Game over: X wins, Score = ~w', [Score]);
-     Result = 'o' -> debug_log('Game over: O wins, Score = ~w', [Score]);
-     debug_log('Game over: Draw, Score = ~w', [Score])).
+    BestCol = -1.
 
-% Base case: no valid moves (draw situation)
+% Base case: no valid moves
 minimax(Board, _Depth, Player, BestCol, Score) :-
     findall(Col, validMove(Col), ValidMoves),
     ValidMoves = [],
-    !,  % Cut to prevent backtracking
+    !,
     increment_position_counter,
     evaluate(Board, Player, Score), 
-    BestCol = -1,
-    debug_log('No valid moves: Draw situation, Score = ~w', [Score]).
+    BestCol = -1.
 
-% Recursive case: evaluate all possible moves with enhanced logging
+% Recursive case: evaluate moves and keep only top 5 (beam search optimization)
 minimax(Board, Depth, Player, BestCol, Score) :-
     findall(Col, validMove(Col), ValidMoves),
     ValidMoves \= [],
-    !,  % Cut to prevent backtracking once we have valid moves
+    !,
     changePlayer(Player, Opponent),
     NewDepth is Depth - 1,
     
     % Log current search state
     debug_log('Searching depth ~w, Player ~w, ~w valid moves available', 
               [Depth, Player, length(ValidMoves)]),
-    debug_log('Valid moves: ~w', [ValidMoves]),
     
-    % Evaluate each move with detailed logging
-    findall(Score-Col, (
-        member(Col, ValidMoves), 
-        simulateMove(Board, Col, NewBoard, Player), 
-        
-        % Log move being evaluated
-        debug_log('Evaluating move in column ~w at depth ~w', [Col, NewDepth]),
-        
-        % Recursive call with incrementing counter
-        minimax(NewBoard, NewDepth, Opponent, _, OppScore), 
-        Score is -OppScore,
-        
-        % Log individual move score
-        analyze_move_quality(NewBoard, Col, NewBoard, Player, Score)
+    % Évaluer tous les coups avec leurs scores immédiats
+    findall(ImmScore-Col, (
+        member(Col, ValidMoves),
+        simulateMove(Board, Col, TmpBoard, Player),
+        evaluate(TmpBoard, Player, ImmScore)
+    ), ScoredMoves),
+    
+    % Trier et garder les 5 meilleurs (beam search)
+    sort(ScoredMoves, Sorted),
+    reverse(Sorted, Descending),
+    take_first_n(5, Descending, TopMoves),
+    
+    debug_log('Beam search: kept top ~w moves from ~w candidates', 
+              [length(TopMoves), length(ValidMoves)]),
+    
+    % Explorer récursivement uniquement les 5 meilleurs
+    findall(FinalScore-Col, (
+        member(_-Col, TopMoves),
+        simulateMove(Board, Col, NewBoard, Player),
+        minimax(NewBoard, NewDepth, Opponent, _, OppScore),
+        FinalScore is -OppScore
     ), ScoresCols),
     
-    ScoresCols \= [],  % Make sure we found some moves
-    sort(ScoresCols, Sorted), 
-    last(Sorted, Score-BestCol),
+    ScoresCols \= [],
+    sort(ScoresCols, FinalSorted),
+    last(FinalSorted, Score-BestCol),
     
     % Update call counter and log final decision
     retract(minimax_calls(CallCount)),
@@ -260,8 +278,22 @@ minimax(Board, Depth, Player, BestCol, Score) :-
     asserta(minimax_calls(NewCallCount)),
     
     debug_log('Depth ~w complete: Best move = column ~w with score ~w', 
-              [Depth, BestCol, Score]),
-    debug_log('All evaluated moves: ~w', [Sorted]).
+              [Depth, BestCol, Score]).
+
+% Prendre les N premiers éléments d'une liste
+take_first_n(0, _, []) :- !.
+take_first_n(_, [], []) :- !.
+take_first_n(N, [H|T], [H|R]) :-
+    N > 0,
+    N1 is N - 1,
+    take_first_n(N1, T, R).
+
+% Simulate a move without modifying the global state
+simulateMove(Board, Col, NewBoard, Player) :-
+    last_index(LastIndex),
+    nth0(Col, LastIndex, Row),
+    Row < 6,
+    replaceMatrix(Board, Row, Col, Player, NewBoard).
 
 % Fallback case: if no scores found, return neutral evaluation
 minimax(Board, _Depth, Player, BestCol, Score) :-

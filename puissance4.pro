@@ -62,7 +62,7 @@ handle_choice(2) :-
 handle_choice(3) :-
     write('Starting IA vs IA...'), nl,
     get_ai_for_player('x', AI1),
-    get_ai_for_player('o', AI2),
+    get_ai_for_player('x', AI2),
     play_aivai(AI1, AI2, 'x').
 handle_choice(q) :-
     writeln('Goodbye.').
