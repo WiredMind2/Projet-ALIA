@@ -74,6 +74,6 @@ playable_score(Board, Score) :-
     ; Score = 0).
 
 % Count empty cells in the board
-count_empty(Board, Count) :- 
-    findall(1, (member(Row,Board), member(0,Row)), L), 
+count_empty(Board, Count) :-
+    findall(1, (member(Row,Board), member('.',Row)), L),
     length(L, Count).

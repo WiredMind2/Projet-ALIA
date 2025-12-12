@@ -55,5 +55,9 @@ setup :-
 % Check if the game is over and return the result
 game_over(Board, Result) :-
     (win(Board, M) -> Result = M ;
-     (\+ (member(Row, Board), member(0, Row)) -> Result = 'draw' ;
+     (board_full(Board) -> Result = 'draw' ;
       Result = 'no')).
+
+% Check if board is full (no empty cells)
+board_full(Board) :-
+    \+ (member(Row, Board), member('.', Row)).
