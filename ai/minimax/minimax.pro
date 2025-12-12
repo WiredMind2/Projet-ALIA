@@ -158,7 +158,7 @@ analyze_move_quality(_, _, _, _, _).
 
 % Configurable depth settings for minimax AI
 % Default depth provides good balance of speed and quality
-get_minimax_depth(4).  % Default search depth
+get_minimax_depth(7).  % Default search depth (changed from 4)
 
 % Alternative depth settings for different game phases
 get_opening_depth(3).     % Faster moves in opening phase
@@ -166,15 +166,165 @@ get_middlegame_depth(4).  % Standard depth for midgame
 get_endgame_depth(6).     % Deeper search in endgame when fewer pieces remain
 
 % =============================================================================
-% ENHANCED MINIMAX WITH LOGGING AND BEAM SEARCH
+% ALPHA-BETA PRUNING COUNTERS
 % =============================================================================
 
-% Main entry point for Minimax AI with configurable depth and logging
+% Track alpha-beta pruning statistics
+:- dynamic alpha_beta_prunes/1.
+:- dynamic alpha_beta_window_updates/1.
+
+alpha_beta_prunes(0).
+alpha_beta_window_updates(0).
+
+% Increment pruning counter
+increment_prune_counter :-
+    retract(alpha_beta_prunes(Count)),
+    NewCount is Count + 1,
+    asserta(alpha_beta_prunes(NewCount)),
+    debug_log('Alpha-beta prune (total: ~w)', [NewCount]).
+increment_prune_counter.
+
+% Increment window update counter
+increment_window_counter :-
+    retract(alpha_beta_window_updates(Count)),
+    NewCount is Count + 1,
+    asserta(alpha_beta_window_updates(NewCount)),
+    debug_log('Window update (total: ~w)', [NewCount]).
+increment_window_counter.
+
+% Reset alpha-beta counters
+reset_alpha_beta_counters :-
+    retractall(alpha_beta_prunes(_)),
+    retractall(alpha_beta_window_updates(_)),
+    asserta(alpha_beta_prunes(0)),
+    asserta(alpha_beta_window_updates(0)).
+
+% =============================================================================
+% ALPHA-BETA PRUNING IMPLEMENTATION (Negamax variant)
+% =============================================================================
+
+% Main alpha-beta predicate with negamax approach
+% alpha_beta(Depth, Position, Alpha, Beta, BestMove, BestValue)
+alpha_beta(0, Board, _Alpha, _Beta, Player, Move, Value) :-
+    !,
+    increment_position_counter,
+    evaluate(Board, Player, Value),
+    Move = -1,
+    debug_log('Leaf node: Value = ~w', [Value]).
+
+alpha_beta(_Depth, Board, _Alpha, _Beta, Player, Move, Value) :-
+    game_over(Board, Result),
+    Result \= 'no',
+    !,
+    increment_position_counter,
+    evaluate(Board, Player, Value),
+    Move = -1,
+    debug_log('Terminal node: Result = ~w, Value = ~w', [Result, Value]).
+
+alpha_beta(Depth, Board, Alpha, Beta, Player, BestMove, BestValue) :-
+    findall(Col, validMove(Col), Moves),
+    Moves \= [],
+    !,
+    debug_log('Alpha-beta at depth ~w: Alpha=~w, Beta=~w, Moves=~w', 
+              [Depth, Alpha, Beta, Moves]),
+    
+    % Evaluate moves with beam search optimization (top 5)
+    findall(ImmScore-Col, (
+        member(Col, Moves),
+        simulateMove(Board, Col, TmpBoard, Player),
+        evaluate(TmpBoard, Player, ImmScore)
+    ), ScoredMoves),
+    
+    sort(ScoredMoves, Sorted),
+    reverse(Sorted, Descending),
+    take_first_n(5, Descending, TopMoves),
+    findall(TopCol, member(_-TopCol, TopMoves), TopCols),
+    
+    debug_log('Beam search: kept top ~w moves: ~w', [length(TopCols), TopCols]),
+    
+    Alpha1 is -Beta,
+    Beta1 is -Alpha,
+    Depth1 is Depth - 1,
+    changePlayer(Player, Opponent),
+    
+    evaluate_and_choose(TopCols, Board, Depth1, Alpha1, Beta1, Player, Opponent, nil, (BestMove, BestValue)),
+    
+    debug_log('Alpha-beta result at depth ~w: Move=~w, Value=~w', 
+              [Depth, BestMove, BestValue]).
+
+% No valid moves - return evaluation
+alpha_beta(_Depth, Board, _Alpha, _Beta, Player, Move, Value) :-
+    increment_position_counter,
+    evaluate(Board, Player, Value),
+    Move = -1,
+    debug_log('No valid moves: Value = ~w', [Value]).
+
+% =============================================================================
+% EVALUATE AND CHOOSE - Process moves and select best
+% =============================================================================
+
+% Process the first move in the list
+evaluate_and_choose([Move | Moves], Board, Depth, Alpha, Beta, Player, Opponent, _CurrentBest, BestResult) :-
+    !,
+    simulateMove(Board, Move, Position1, Player),
+    debug_log('Evaluating move ~w at depth ~w', [Move, Depth]),
+    
+    alpha_beta(Depth, Position1, Alpha, Beta, Opponent, _MoveX, Value),
+    Value1 is -Value,
+    
+    debug_log('Move ~w: Value = ~w (negated = ~w)', [Move, Value, Value1]),
+    
+    cutoff(Move, Value1, Depth, Alpha, Beta, Moves, Board, Player, Opponent, BestResult).
+
+% No more moves to evaluate - return current best (alpha value)
+evaluate_and_choose([], _Board, _Depth, Alpha, _Beta, _Player, _Opponent, CurrentBest, Result) :-
+    !,
+    (CurrentBest = nil ->
+        Result = (-1, Alpha),
+        debug_log('No moves evaluated: returning Alpha = ~w', [Alpha])
+    ;
+        Result = CurrentBest,
+        debug_log('All moves evaluated: Best = ~w', [CurrentBest])
+    ).
+
+% =============================================================================
+% CUTOFF - Handle alpha-beta pruning cases
+% =============================================================================
+
+% Case 1: Beta cutoff - Value exceeds Beta (prune remaining moves)
+cutoff(Move, Value, _Depth, _Alpha, Beta, _Moves, _Board, _Player, _Opponent, (Move, Value)) :-
+    Value >= Beta,
+    !,
+    increment_prune_counter,
+    debug_log('BETA CUTOFF: Move=~w, Value=~w >= Beta=~w (pruned)', [Move, Value, Beta]).
+
+% Case 2: Value improves Alpha - Update window and continue
+cutoff(Move, Value, Depth, Alpha, Beta, Moves, Board, Player, Opponent, BestResult) :-
+    Value > Alpha,
+    Value < Beta,
+    !,
+    increment_window_counter,
+    debug_log('WINDOW UPDATE: Move=~w, Value=~w in (Alpha=~w, Beta=~w)', [Move, Value, Alpha, Beta]),
+    evaluate_and_choose(Moves, Board, Depth, Value, Beta, Player, Opponent, (Move, Value), BestResult).
+
+% Case 3: Value doesn't improve Alpha - Continue with current Alpha
+cutoff(_Move, Value, Depth, Alpha, Beta, Moves, Board, Player, Opponent, BestResult) :-
+    Value =< Alpha,
+    !,
+    debug_log('NO IMPROVEMENT: Value=~w =< Alpha=~w', [Value, Alpha]),
+    evaluate_and_choose(Moves, Board, Depth, Alpha, Beta, Player, Opponent, nil, BestResult).
+
+% =============================================================================
+% ENHANCED MINIMAX WITH LOGGING AND ALPHA-BETA PRUNING
+% =============================================================================
+
+% Main entry point for Minimax AI with alpha-beta pruning
 minimax_ai(Board, NewBoard, Player) :-
     get_minimax_depth(Depth),
-    info_log('Starting minimax AI with depth ~w', [Depth]),
+    info_log('Starting alpha-beta AI with depth ~w', [Depth]),
     start_performance_timing,
     reset_counters,
+    reset_alpha_beta_counters,
     
     % 1. Vérifier si on peut gagner immédiatement
     (   find_winning_move(Board, Player, WinCol)
@@ -185,21 +335,26 @@ minimax_ai(Board, NewBoard, Player) :-
         find_winning_move(Board, Opponent, BlockCol)
     ->  playMove(Board, BlockCol, NewBoard, Player),
         info_log('Found blocking move in column ~w', [BlockCol])
-    % 3. Sinon, utiliser minimax
-    ;   minimax(Board, Depth, Player, BestCol, _),
+    % 3. Sinon, utiliser alpha-beta pruning
+    ;   Alpha is -100000,
+        Beta is 100000,
+        alpha_beta(Depth, Board, Alpha, Beta, Player, BestCol, BestValue),
         (   BestCol >= 0, BestCol =< 6
         ->  playMove(Board, BestCol, NewBoard, Player),
-            info_log('AI made strategic move in column ~w', [BestCol])
+            info_log('AI made strategic move in column ~w with value ~w', [BestCol, BestValue])
         ;   random_ai:random_ai(Board, NewBoard, Player),
             info_log('AI made random move (no good moves found)', [])
         )
     ),
     
     end_performance_timing,
-    % Log final statistics
+    % Log final statistics including pruning info
     minimax_calls(CallCount),
     minimax_positions_evaluated(PositionCount),
-    info_log('AI completed: ~w calls, ~w positions evaluated', [CallCount, PositionCount]).
+    alpha_beta_prunes(PruneCount),
+    alpha_beta_window_updates(WindowCount),
+    info_log('AI completed: ~w calls, ~w positions, ~w prunes, ~w window updates', 
+             [CallCount, PositionCount, PruneCount, WindowCount]).
 
 % Trouve un coup gagnant pour le joueur (si il existe)
 find_winning_move(Board, Player, WinningCol) :-
@@ -210,8 +365,20 @@ find_winning_move(Board, Player, WinningCol) :-
     WinningCol = Col,
     !. % Premier coup gagnant trouvé
 
+% Prendre les N premiers éléments d'une liste
+take_first_n(0, _, []) :- !.
+take_first_n(_, [], []) :- !.
+take_first_n(N, [H|T], [H|R]) :-
+    N > 0,
+    N1 is N - 1,
+    take_first_n(N1, T, R).
+
+% =============================================================================
+% OLD MINIMAX WITHOUT PRUNING (for comparison/testing)
+% =============================================================================
+
 % Base case: depth limit reached
-minimax(Board, Depth, Player, BestCol, Score) :-
+minimax_no_pruning(Board, Depth, Player, BestCol, Score) :-
     Depth =< 0,
     !,
     increment_position_counter,
@@ -219,7 +386,7 @@ minimax(Board, Depth, Player, BestCol, Score) :-
     BestCol = -1.
 
 % Base case: game is over
-minimax(Board, _Depth, Player, BestCol, Score) :-
+minimax_no_pruning(Board, _Depth, Player, BestCol, Score) :-
     game_over(Board, Result), 
     Result \= 'no',
     !,
@@ -228,7 +395,7 @@ minimax(Board, _Depth, Player, BestCol, Score) :-
     BestCol = -1.
 
 % Base case: no valid moves
-minimax(Board, _Depth, Player, BestCol, Score) :-
+minimax_no_pruning(Board, _Depth, Player, BestCol, Score) :-
     findall(Col, validMove(Col), ValidMoves),
     ValidMoves = [],
     !,
@@ -237,7 +404,7 @@ minimax(Board, _Depth, Player, BestCol, Score) :-
     BestCol = -1.
 
 % Recursive case: evaluate moves and keep only top 5 (beam search optimization)
-minimax(Board, Depth, Player, BestCol, Score) :-
+minimax_no_pruning(Board, Depth, Player, BestCol, Score) :-
     findall(Col, validMove(Col), ValidMoves),
     ValidMoves \= [],
     !,
@@ -267,7 +434,7 @@ minimax(Board, Depth, Player, BestCol, Score) :-
     findall(FinalScore-Col, (
         member(_-Col, TopMoves),
         simulateMove(Board, Col, NewBoard, Player),
-        minimax(NewBoard, NewDepth, Opponent, _, OppScore),
+        minimax_no_pruning(NewBoard, NewDepth, Opponent, _, OppScore),
         FinalScore is -OppScore
     ), ScoresCols),
     
@@ -283,16 +450,8 @@ minimax(Board, Depth, Player, BestCol, Score) :-
     debug_log('Depth ~w complete: Best move = column ~w with score ~w', 
               [Depth, BestCol, Score]).
 
-% Prendre les N premiers éléments d'une liste
-take_first_n(0, _, []) :- !.
-take_first_n(_, [], []) :- !.
-take_first_n(N, [H|T], [H|R]) :-
-    N > 0,
-    N1 is N - 1,
-    take_first_n(N1, T, R).
-
 % Fallback case: if no scores found, return neutral evaluation
-minimax(Board, _Depth, Player, BestCol, Score) :-
+minimax_no_pruning(Board, _Depth, Player, BestCol, Score) :-
     increment_position_counter,
     evaluate(Board, Player, Score),
     BestCol = -1,
@@ -344,7 +503,19 @@ disable_performance_tracking :-
     retractall(minimax_performance_tracking(_)),
     asserta(minimax_performance_tracking(false)).
 
-% Get current statistics
+% Get current statistics including alpha-beta info
+get_minimax_stats(Calls, Positions, Prunes, WindowUpdates, TimeInfo) :-
+    minimax_calls(Calls),
+    minimax_positions_evaluated(Positions),
+    alpha_beta_prunes(Prunes),
+    alpha_beta_window_updates(WindowUpdates),
+    (minimax_start_time(StartTime) -> 
+        get_time(CurrentTime),
+        Elapsed is CurrentTime - StartTime,
+        sformat(TimeInfo, '~6f seconds', [Elapsed])
+    ; TimeInfo = 'N/A').
+
+% Backward compatibility version
 get_minimax_stats(Calls, Positions, TimeInfo) :-
     minimax_calls(Calls),
     minimax_positions_evaluated(Positions),
@@ -365,9 +536,15 @@ minimax_ai_simple(Board, NewBoard, Player) :-
     minimax_ai(Board, NewBoard, Player),
     enable_minimax_logging.
 
-% Original minimax predicate for backward compatibility
+% Original minimax predicate for backward compatibility - now uses alpha-beta
+minimax(Board, Depth, Player, BestCol, Score) :-
+    Alpha is -100000,
+    Beta is 100000,
+    alpha_beta(Depth, Board, Alpha, Beta, Player, BestCol, Score).
+
+% Original minimax predicate without alpha-beta (for testing/comparison)
 minimax_original(Board, Depth, Player, BestCol, Score) :-
     % Temporarily disable debug logging for performance
     disable_minimax_debug,
-    minimax(Board, Depth, Player, BestCol, Score),
+    minimax_no_pruning(Board, Depth, Player, BestCol, Score),
     enable_minimax_debug.
