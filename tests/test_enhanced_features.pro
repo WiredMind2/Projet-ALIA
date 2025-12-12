@@ -7,8 +7,8 @@
 :- consult('puissance4.pro').
 :- consult('ai/minimax/minimax.pro').
 :- consult('ai/debug/minimax_debug.pro').
-:- consult('test_comprehensive_minimax.pro').
-:- consult('performance_benchmarks.pro').
+:- consult('tests/test_comprehensive_minimax.pro').
+:- consult('tests/performance_benchmarks.pro').
 
 % =============================================================================
 % MAIN TEST EXECUTION

@@ -5,17 +5,17 @@
 :- consult('../win.pro').
 
 % Main evaluation function for minimax
-% Calcule score joueur - score adversaire avec TOUTES les heuristiques
+% Calcule score joueur - score adversaire avec heuristiques avancées
 evaluate(Board, Player, Score) :-
     game_over(Board, Result),
     changePlayer(Player, Opponent),
-    ( Result == Player -> 
+    ( Result == Player ->
         Score = 10000
-    ; Result == Opponent -> 
+    ; Result == Opponent ->
         Score = -10000
-    ; Result == 'draw' -> 
+    ; Result == 'draw' ->
         Score = 0
-    ; % Partie non terminée : calculer toutes les heuristiques
+    ; % Partie non terminée : calculer toutes les heuristiques originales
         % Heuristiques pour le joueur
         center_score(Board, Player, MyCenter),
         space_between_opponent_tokens(Board, Player, MySpace),

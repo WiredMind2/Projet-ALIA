@@ -1,6 +1,6 @@
 % Test runner script for minimax AI tests
 :- consult('puissance4.pro').
-:- consult('test_minimax_comprehensive').
+:- consult('tests/test_minimax_comprehensive.pro').
 
 % Simple test to verify basic functionality
 test_basic_minimax :-

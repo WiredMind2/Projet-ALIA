@@ -1,6 +1,6 @@
 % Final test runner
 :- consult('puissance4.pro').
-:- consult('test_minimax_comprehensive').
+:- consult('tests/test_minimax_comprehensive.pro').
 
 % Run all the basic tests
 run_basic_tests :-
