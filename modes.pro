@@ -4,14 +4,16 @@
 
 play(Player):-  
     write('New turn for: '),
-    writeln(Player),
+    print_player(Player),
+    nl,
     board(Board),
     print_board(Board),
     playHumanMove(Board, NewBoard, Player),
     applyBoard(Board, NewBoard),
     game_over(NewBoard, Result),
     ( Result \= 'no' ->
-        ( Result = 'draw' -> writeln('It''s a draw!') ;  format('Player ~w wins!~n', [Result]),print_board(NewBoard) ),
+        print_board(NewBoard),
+        ( Result = 'draw' -> writeln('It''s a draw!') ; write('Player '), print_player(Result), writeln(' wins!'),print_board(NewBoard) ),
         !
     ;
         changePlayer(Player,NextPlayer),
@@ -19,7 +21,7 @@ play(Player):-
     ).
 
 play_pvai(Player) :-  % Player 'x' = human, 'o' = IA
-    write('New turn for: '), writeln(Player),
+    write('New turn for: '), print_player(Player), nl,
     board(Board),
     print_board(Board),
     ( Player = 'x' ->
@@ -30,21 +32,23 @@ play_pvai(Player) :-  % Player 'x' = human, 'o' = IA
     applyBoard(Board, NewBoard),
     game_over(NewBoard, Result),
     ( Result \= 'no' ->
-        ( Result = 'draw' -> writeln('It''s a draw!') ; format('Player ~w wins!~n', [Result]), print_board(NewBoard) )
+        print_board(NewBoard),
+        ( Result = 'draw' -> writeln('It''s a draw!') ; write('Player '), print_player(Result), writeln(' wins!'), print_board(NewBoard) )
     ;
         changePlayer(Player,NextPlayer),
         play_pvai(NextPlayer)
     ).
 
 play_aivai(Player) :-  % Player 'x' = IA, 'o' = IA
-    write('New turn for: '), writeln(Player),
+    write('New turn for: '), print_player(Player), nl,
     board(Board),
     print_board(Board),
     iaRandom(Board, NewBoard, Player),
     applyBoard(Board, NewBoard),
     game_over(NewBoard, Result),
     ( Result \= 'no' ->
-        ( Result = 'draw' -> writeln('It''s a draw!') ; format('Player ~w wins!~n', [Result]), print_board(NewBoard) )
+        print_board(NewBoard),
+        ( Result = 'draw' -> writeln('It''s a draw!') ; write('Player '), print_player(Result), writeln(' wins!'), print_board(NewBoard) )
     ;
         changePlayer(Player,NextPlayer),
         play_aivai(NextPlayer)

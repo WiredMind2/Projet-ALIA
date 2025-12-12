@@ -1,3 +1,11 @@
+
+
+% Print player with their color
+print_player(x) :- 
+    ansi_format([fg(red)], 'o', []).
+print_player(o) :- 
+    ansi_format([fg(yellow)], 'o', []).
+
 print_cell(.) :-
     write('.').
 print_cell(x) :- 
