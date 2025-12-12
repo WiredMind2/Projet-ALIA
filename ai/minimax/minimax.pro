@@ -4,6 +4,9 @@
 :- consult('../game_utils.pro').
 :- consult('../evaluation.pro').
 
+% Tell Prolog that minimax/5 clauses are not contiguous
+:- discontiguous minimax/5.
+
 % =============================================================================
 % LOGGING CONFIGURATION AND STATE
 % =============================================================================
@@ -287,13 +290,6 @@ take_first_n(N, [H|T], [H|R]) :-
     N > 0,
     N1 is N - 1,
     take_first_n(N1, T, R).
-
-% Simulate a move without modifying the global state
-simulateMove(Board, Col, NewBoard, Player) :-
-    last_index(LastIndex),
-    nth0(Col, LastIndex, Row),
-    Row < 6,
-    replaceMatrix(Board, Row, Col, Player, NewBoard).
 
 % Fallback case: if no scores found, return neutral evaluation
 minimax(Board, _Depth, Player, BestCol, Score) :-
