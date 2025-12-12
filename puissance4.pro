@@ -57,7 +57,7 @@ handle_choice(1) :-
     play('x').
 handle_choice(2) :-
     write('Starting Player vs IA...'), nl,
-    get_ai_for_player('o', AI),
+    get_ai_for_player('x', AI),
     play_pvai(AI, 'x').
 handle_choice(3) :-
     write('Starting IA vs IA...'), nl,
