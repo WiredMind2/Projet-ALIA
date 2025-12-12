@@ -27,7 +27,7 @@ play_pvai(Player) :-  % Player 'x' = human, 'o' = IA
     ( Player = 'x' ->
         playHumanMove(Board, NewBoard, Player)
     ;
-        iaRandom(Board, NewBoard, Player)
+        iaPresqueRandom(Board, NewBoard, Player)
     ),
     applyBoard(Board, NewBoard),
     game_over(NewBoard, Result),
@@ -59,11 +59,12 @@ playHumanMove(Board,NewBoard,Player) :-
     (   integer(Col), Col >= 1, Col =< 7
     ->  ColIndex is Col - 1,
         (   validMove(ColIndex)
-        ->  playMove(Board, ColIndex, TmpBoard, Player),
+        ->  last_index(LastIndex),
+            playMove(Board, ColIndex, TmpBoard, Player, LastIndex, NewLastIndex),
             NewBoard = TmpBoard,
+            applyLastIndex(LastIndex, NewLastIndex),
             write('Dropping in column '), write(Col), nl,
-            last_index(UpdatedIdx),
-            write('Updated Indices: '), writeln(UpdatedIdx),
+            write('Updated Indices: '), writeln(NewLastIndex),
             true
         ;   writeln('Column is full, pick another.'),
             playHumanMove(Board,NewBoard,Player)

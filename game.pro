@@ -4,14 +4,12 @@
 :- consult('matrix.pro').
 :- consult('win.pro').
 
-playMove(Board,Col,NewBoard,Player):-
-    last_index(LastIndex),
+playMove(Board,Col,NewBoard,Player,LastIndex,NewLastIndex):-
     nth0(Col,LastIndex,Row),
     Row < 6,                         
     replaceMatrix(Board,Row,Col, Player,NewBoard),
     NewRow is Row + 1,
-    replace(LastIndex,Col,NewRow,NewLastIndex),
-    applyLastIndex(LastIndex,NewLastIndex).
+    replace(LastIndex,Col,NewRow,NewLastIndex).
 
 applyBoard(_OldBoard,NewBoard):-
     retractall(board(_)),
