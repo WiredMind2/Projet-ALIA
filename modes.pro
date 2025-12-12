@@ -43,7 +43,11 @@ play_aivai(Player) :-  % Player 'x' = IA, 'o' = IA
     write('New turn for: '), print_player(Player), nl,
     board(Board),
     print_board(Board),
-    iaRandom(Board, NewBoard, Player),
+    ( Player = 'x' ->
+        iaRandom(Board, NewBoard, Player)
+    ;
+        iaPresqueRandom(Board, NewBoard, Player)
+    ),
     applyBoard(Board, NewBoard),
     game_over(NewBoard, Result),
     ( Result \= 'no' ->
