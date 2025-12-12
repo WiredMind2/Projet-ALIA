@@ -13,7 +13,7 @@ play(Player):-
     game_over(NewBoard, Result),
     ( Result \= 'no' ->
         print_board(NewBoard),
-        ( Result = 'draw' -> writeln('It''s a draw!') ; write('Player '), print_player(Result), writeln(' wins!'),print_board(NewBoard) ),
+        ( Result = 'draw' -> writeln('It''s a draw!') ; write('Player '), print_player(Result), writeln(' wins!') ),
         !
     ;
         changePlayer(Player,NextPlayer),
@@ -33,7 +33,7 @@ play_pvai(Player) :-  % Player 'x' = human, 'o' = IA
     game_over(NewBoard, Result),
     ( Result \= 'no' ->
         print_board(NewBoard),
-        ( Result = 'draw' -> writeln('It''s a draw!') ; write('Player '), print_player(Result), writeln(' wins!'), print_board(NewBoard) )
+        ( Result = 'draw' -> writeln('It''s a draw!') ; write('Player '), print_player(Result), writeln(' wins!') )
     ;
         changePlayer(Player,NextPlayer),
         play_pvai(NextPlayer)
@@ -48,7 +48,7 @@ play_aivai(Player) :-  % Player 'x' = IA, 'o' = IA
     game_over(NewBoard, Result),
     ( Result \= 'no' ->
         print_board(NewBoard),
-        ( Result = 'draw' -> writeln('It''s a draw!') ; write('Player '), print_player(Result), writeln(' wins!'), print_board(NewBoard) )
+        ( Result = 'draw' -> writeln('It''s a draw!') ; write('Player '), print_player(Result), writeln(' wins!') )
     ;
         changePlayer(Player,NextPlayer),
         play_aivai(NextPlayer)
