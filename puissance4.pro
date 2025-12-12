@@ -7,8 +7,34 @@
 
 iaRandom(Board, NewBoard, Player) :-
     findall(Column, validMove(Column), ValidMoves),
+    ValidMoves \= [],
     random_member(ChosenColumn, ValidMoves),
     playMove(Board, ChosenColumn, NewBoard, Player).
+
+iaPresqueRandom(Player, Board, NewBoard) :-
+    /** Plays randomly unless able to win or opponent about to win **/
+    findall(Col, validMove(Col), ValidMoves),
+    ValidMoves \= [],
+    (   
+        /** Winning move **/
+        member(Col, ValidMoves),
+        playMove(Board, Col, TmpBoard, Player),
+        game_over(TmpBoard, Result),
+        Result == Player
+    ->  playMove(Board, Col, NewBoard, Player)
+    ;   
+        /** Block opponent's win **/
+        changePlayer(Player, Opponent),
+        member(Col, ValidMoves),
+        playMove(Board, Col, TmpBoard, Opponent),
+        game_over(TmpBoard, Result),
+        Result == Opponent
+    ->  playMove(Board, Col, NewBoard, Player)
+    ;   
+        /** Play random otherwise **/
+        random_member(ChosenColumn, ValidMoves),
+        playMove(Board, ChosenColumn, NewBoard, Player)
+    ).
 
 play(Player):-  
     write('New turn for: '),
@@ -16,7 +42,7 @@ play(Player):-
     board(Board),
     print_board(Board),
     playHumanMove(Board, NewBoard, Player),
-    applyIt(Board, NewBoard),
+    applyBoard(Board, NewBoard),
     game_over(NewBoard, Result),
     ( Result \= 'no' ->
         ( Result = 'draw' -> writeln('It''s a draw!') ;  format('Player ~w wins!~n', [Result]),print_board(NewBoard) ),
@@ -53,10 +79,6 @@ validMove(Col) :-
     nth0(Col, Indices, Row),
     Row < 6.
 
-applyIt(OldBoard, NewBoard):- 
-    retract(board(OldBoard)), 
-    assert(board(NewBoard)).
-
 setup :- 
     retractall(board(_)),
     retractall(last_index(_)),
@@ -65,10 +87,6 @@ setup :-
     maplist(=(0), Indices),
     assert(last_index(Indices)),
     assert(board(Board)).
-
-init :-
-    setup,
-    play('x').
 
 start :-
     setup,
@@ -107,7 +125,7 @@ play_pvai(Player) :-  % Player 'x' = human, 'o' = IA
     ;
         iaRandom(Board, NewBoard, Player)
     ),
-    applyIt(Board, NewBoard),
+    applyBoard(Board, NewBoard),
     game_over(NewBoard, Result),
     ( Result \= 'no' ->
         ( Result = 'draw' -> writeln('It''s a draw!') ; format('Player ~w wins!~n', [Result]), print_board(NewBoard) )
@@ -121,7 +139,7 @@ play_aivai(Player) :-  % Player 'x' = IA, 'o' = IA
     board(Board),
     print_board(Board),
     iaRandom(Board, NewBoard, Player),
-    applyIt(Board, NewBoard),
+    applyBoard(Board, NewBoard),
     game_over(NewBoard, Result),
     ( Result \= 'no' ->
         ( Result = 'draw' -> writeln('It''s a draw!') ; format('Player ~w wins!~n', [Result]), print_board(NewBoard) )
