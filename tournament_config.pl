@@ -1,21 +1,23 @@
 % Tournament Configuration File
 % Format: ai_config(Id, Type, Parameters)
-% Type can be: random, minimax, alphabeta, etc.
-% Parameters is a list of key-value pairs
+% Type can be: random, presque_random, minimax
+% Parameters is a list of key-value pairs: depth(N), alphabeta(true/false)
 
 % Random AI (baseline)
 ai_config(random1, random, []).
 
-% Minimax with different depths
-ai_config(minimax_d3, minimax, [depth(3)]).
-ai_config(minimax_d4, minimax, [depth(4)]).
-ai_config(minimax_d5, minimax, [depth(5)]).
+% Presque Random AI (blocks and takes wins)
+ai_config(presque_random1, presque_random, []).
 
-% Example: Minimax with different heuristics (when implemented)
-% ai_config(minimax_basic, minimax, [depth(4), heuristic(basic)]).
-% ai_config(minimax_advanced, minimax, [depth(4), heuristic(advanced)]).
-% ai_config(minimax_aggressive, minimax, [depth(4), heuristic(aggressive)]).
+% Minimax WITHOUT Alpha-Beta Pruning (slower, for comparison)
+ai_config(minimax_d2_noab, minimax, [depth(2), alphabeta(false)]).
+ai_config(minimax_d3_noab, minimax, [depth(3), alphabeta(false)]).
 
-% Example: Alpha-beta pruning (when implemented)
-% ai_config(alphabeta_d5, alphabeta, [depth(5)]).
-% ai_config(alphabeta_d6, alphabeta, [depth(6)]).
+% Minimax WITH Alpha-Beta Pruning (faster, recommended)
+ai_config(minimax_d3_ab, minimax, [depth(3), alphabeta(true)]).
+ai_config(minimax_d4_ab, minimax, [depth(4), alphabeta(true)]).
+ai_config(minimax_d5_ab, minimax, [depth(5), alphabeta(true)]).
+
+% Advanced configurations (if depth omitted, defaults to 4; if alphabeta omitted, defaults to true)
+% ai_config(minimax_default, minimax, []).
+% ai_config(minimax_d6_ab, minimax, [depth(6), alphabeta(true)]).

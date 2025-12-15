@@ -1,6 +1,7 @@
 :- consult('game.pro').
 :- consult('print.pro').
 :- consult('ia.pro').
+:- consult('minimax.pro').
 
 play(Player):-  
     write('New turn for: '),
@@ -21,13 +22,16 @@ play(Player):-
     ).
 
 play_pvai(Player) :-  % Player 'x' = human, 'o' = IA
+    play_pvai(Player, minimax, 7, true).
+
+play_pvai(Player, AIType, Depth, UseAlphaBeta) :-
     write('New turn for: '), print_player(Player), nl,
     board(Board),
     print_board(Board),
     ( Player = 'x' ->
         playHumanMove(Board, NewBoard, Player)
     ;
-        iaPresqueRandom(Board, NewBoard, Player)
+        make_ai_move(Board, NewBoard, Player, AIType, Depth, UseAlphaBeta)
     ),
     applyBoard(Board, NewBoard),
     game_over(NewBoard, Result),
@@ -36,8 +40,16 @@ play_pvai(Player) :-  % Player 'x' = human, 'o' = IA
         ( Result = 'draw' -> writeln('It''s a draw!') ; write('Player '), print_player(Result), writeln(' wins!') )
     ;
         changePlayer(Player,NextPlayer),
-        play_pvai(NextPlayer)
+        play_pvai(NextPlayer, AIType, Depth, UseAlphaBeta)
     ).
+
+% Make AI move based on type
+make_ai_move(Board, NewBoard, Player, random, _Depth, _UseAB) :-
+    iaRandom(Board, NewBoard, Player).
+make_ai_move(Board, NewBoard, Player, minimax, Depth, UseAlphaBeta) :-
+    iaMinimax(Board, NewBoard, Player, Depth, UseAlphaBeta).
+make_ai_move(Board, NewBoard, Player, _, _Depth, _UseAB) :-
+    iaPresqueRandom(Board, NewBoard, Player).
 
 play_aivai(Player) :-  % Player 'x' = IA, 'o' = IA
     write('New turn for: '), print_player(Player), nl,
