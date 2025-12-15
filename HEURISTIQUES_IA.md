@@ -16,22 +16,18 @@ J J J J  ← Alignement gagnant
 
 ## 2. Jeu proche du centre (stratégie positionnelle)
 
-**Score : de +0 à +4 (proportionnel)**
+**Score : selon la grille ci-dessous**
 
-- Plus le coup est joué près du centre du plateau, plus le bonus est élevé
-- Le centre offre plus d'opportunités d'alignement (horizontal, vertical, diagonales)
-- Formule proportionnelle à la distance au centre
+| 3 | 4 | 5 | 7 | 5 | 4 | 3 |
+| 4 | 6 | 8 | 10 | 8 | 6 | 4 |
+| 5 | 8 | 11 | 14 | 11 | 8 | 5 |
+| 5 | 8 | 11 | 14 | 11 | 8 | 5 |
+| 4 | 6 | 8 | 10 | 8 | 6 | 4 |
+| 3 | 4 | 5 | 7 | 5 | 4 | 3 |
 
-## 3. Pourcentage de cases vides/jouées entre 2 jetons de l'adversaire (minimum 4)
+## 3. Groupes de pièces connectées
 
-Entre deux jetons de l'adversaire, le pourcentage de jetons du joueur par rapport aux cases libres est évalué. Entre les deux jetons de l'adversaire l'espace doit être d'au moins 4 cases. 
+**Score :**
 
-**Scoring selon le pourcentage de cases libres :**
-
-| % de cases libres | Score     |
-|-------------------|-----------|
-| 60%               | +1000     |
-| 50%               | +5        |
-| 40%               | +4        |
-| 30%               | +3        |
-| 20%               | +2        |
+- 2 pièces consécutives : +10 points
+- 3 pièces consécutives : +100 points
