@@ -48,11 +48,3 @@ minimax_ai(Board, NewBoard, Player) :-
     coup_alpha_beta(Board, Player, Column),       % Get recommended column from minimax
     % Apply the chosen move
     playMove(Board, Column, NewBoard, Player).
-
-% iaRandom(Board, NewBoard, Player)
-% Alias for backward compatibility
-% Provides consistent naming with other AI functions
-% Board: current game board
-% NewBoard: resulting board after the AI move
-% Player: player number (1 or 2) making the move
-iaRandom(Board, NewBoard, Player) :- random_ai(Board, NewBoard, Player).

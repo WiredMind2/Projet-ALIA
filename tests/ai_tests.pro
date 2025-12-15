@@ -4,7 +4,7 @@
 :- consult('../ai/random/random.pro').
 :- consult('../ai/random/almost_random.pro').
 :- consult('../ai/minimax.pro').
-:- consult('../ai/game_utils.pro').
+:- consult('../ai/game.pro').
 :- consult('../matrix.pro').
 :- consult('../win.pro').
 

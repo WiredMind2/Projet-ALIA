@@ -17,7 +17,7 @@ This Prolog project implements a complete Connect Four (Puissance 4) game with m
 ├── ai/                     # AI implementation modules
 │   ├── minimax.pro         # Minimax algorithm with alpha-beta pruning
 │   ├── evaluation.pro      # Heuristic evaluation functions
-│   ├── game_utils.pro      # Shared game utilities for all AIs
+│   ├── game.pro      # Shared game utilities for all AIs
 │   ├── random/             # Random AI implementations
 │   │   ├── random.pro      # Pure random AI
 │   │   └── almost_random.pro # Smart random AI with win detection
@@ -73,7 +73,7 @@ The main game flow follows this pattern:
 - `diagonal_win/2`: Checks both diagonal directions
 - `check_diagonal/6`: Generic diagonal checking with configurable direction
 
-#### `ai/game_utils.pro` - Shared Utilities
+#### `ai/game.pro` - Shared Utilities
 - `playMove/4`: Applies moves to board (stateful, for main game)
 - `simulateMove/4`: Simulates moves without state changes (for AI)
 - `validMove/2`: Checks if column is playable

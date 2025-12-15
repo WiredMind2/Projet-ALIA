@@ -2,7 +2,7 @@
 % This file orchestrates the execution of all test modules
 
 :- consult('core_game_tests.pro').
-:- consult('game_utils_tests.pro').
+:- consult('game_tests.pro').
 :- consult('ai_tests.pro').
 
 % Run all test suites
@@ -19,7 +19,7 @@ run_all_tests :-
 
     % Game utilities tests
     writeln('Running Game Utilities Tests...'),
-    run_all_game_utils_tests,
+    run_all_game_tests,
     nl,
 
     % AI implementation tests
@@ -35,11 +35,11 @@ run_all_tests :-
 quick_test :-
     writeln('Running Quick Test Suite...'),
     quick_core_test,
-    quick_game_utils_test,
+    quick_game_test,
     quick_ai_test,
     writeln('Quick tests completed!').
 
 % Individual test suite runners (for targeted testing)
 run_core_tests :- run_all_core_tests.
-run_utils_tests :- run_all_game_utils_tests.
+run_utils_tests :- run_all_game__tests.
 run_ai_tests :- run_all_ai_tests.

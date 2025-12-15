@@ -142,7 +142,7 @@ test_all.
 ## Integration with Existing Code
 
 The implementation integrates with:
-- `ai/game_utils.pro`: Board manipulation and validation
+- `ai/game.pro`: Board manipulation and validation
 - `ai/evaluation.pro`: Heuristic evaluation functions
 - `win.pro`: Victory detection
 - `matrix.pro`: Matrix operations

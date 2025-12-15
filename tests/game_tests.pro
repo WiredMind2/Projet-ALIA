@@ -1,7 +1,7 @@
 % Test suite for game utilities and move validation
 % Tests move simulation, validation, and game state management
 
-:- consult('../ai/game_utils.pro').
+:- consult('../ai/game.pro').
 :- consult('../matrix.pro').
 :- consult('../win.pro').
 
@@ -212,7 +212,7 @@ fill_all_cells(Board, FullBoard) :-
 % ========================================
 
 % Run all game utilities tests
-run_all_game_utils_tests :-
+run_all_game_tests :-
     writeln('=== Running Game Utilities Tests ==='),
     nl,
 
@@ -247,7 +247,7 @@ run_all_game_utils_tests :-
     writeln('=== Game Utilities Tests Completed ===').
 
 % Quick test for development
-quick_game_utils_test :-
+quick_game_test :-
     test_valid_move_empty_board,
     test_simulate_move_empty_board,
     test_setup_initializes_correctly.
