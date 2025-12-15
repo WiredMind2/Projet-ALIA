@@ -1,15 +1,33 @@
 % Board printing functions for Connect Four game
 % This module handles the visual display of the game board
 
+% Print player with their color
+print_player(1) :- 
+    ansi_format([fg(red)], 'o', []).
+print_player(2) :- 
+    ansi_format([fg(yellow)], 'o', []).
+print_player(x) :- 
+    ansi_format([fg(red)], 'o', []).
+print_player(o) :- 
+    ansi_format([fg(yellow)], 'o', []).
+
 % print_cell(Value)
 % Prints a single cell with appropriate character representation
 % Value: 0 for empty, 1 for player 1 ('x'), 2 for player 2 ('o')
 print_cell(0) :-
     write('.').                                    % Empty cell
+print_cell(.) :-
+    write('.').
 print_cell(1) :- 
-    write('x').                                    % Player 1 cell
+    ansi_format([fg(red)], 'o', []).               % Player 1 cell
 print_cell(2) :- 
-    write('o').                                    % Player 2 cell
+    ansi_format([fg(yellow)], 'o', []).            % Player 2 cell
+print_cell(x) :- 
+    ansi_format([fg(red)], 'o', []).
+print_cell(o) :- 
+    ansi_format([fg(yellow)], 'o', []).
+
+
 
 % print_row(Cells)
 % Prints a single row of cells with space separation

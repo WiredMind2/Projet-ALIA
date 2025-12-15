@@ -150,7 +150,7 @@ test_no_diagonal_win :-
 test_generate_matrix_correct_size :-
     generate_matrix(7, 6, Matrix),
     length(Matrix, 7),                    % Should have 7 columns
-    maplist(length, 6, Matrix),           % Each column should have 6 rows
+    maplist(length_list(6), Matrix),      % Each column should have 6 rows
     writeln('✓ Matrix generation creates correct dimensions').
 
 test_generate_matrix_initialized_to_zero :-
