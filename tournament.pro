@@ -1,6 +1,7 @@
 % Tournament Engine - Simplified
 :- consult('game.pro').
 :- consult('ia.pro').
+:- consult('minimax.pro').
 
 :- dynamic ai_config/3.
 :- dynamic tournament_stat/4.
@@ -46,10 +47,22 @@ play_game(Player, AI1, T1, P1, AI2, T2, P2, Result) :-
         changePlayer(Player, Next),
         play_game(Next, AI1, T1, P1, AI2, T2, P2, Result)
     ).
+% Get parameter from list with default
+get_param(Params, Key, Value, Default) :-
+    Term =.. [Key, Value],
+    (member(Term, Params) -> true ; Value = Default).
 
-% Make AI move
-make_move(Board, NewBoard, Player, random, _) :- iaRandom(Board, NewBoard, Player).
-make_move(Board, NewBoard, Player, _, _) :- iaRandom(Board, NewBoard, Player).
+% Make AI move based on type and parameters
+make_move(Board, NewBoard, Player, random, _) :- 
+    iaRandom(Board, NewBoard, Player).
+make_move(Board, NewBoard, Player, presque_random, _) :- 
+    iaPresqueRandom(Board, NewBoard, Player).
+make_move(Board, NewBoard, Player, minimax, Params) :-
+    get_param(Params, depth, Depth, 4),
+    get_param(Params, alphabeta, UseAB, true),
+    iaMinimax(Board, NewBoard, Player, Depth, UseAB).
+make_move(Board, NewBoard, Player, _, _) :- 
+    iaRandom(Board, NewBoard, Player).
 
 % Record result
 record_result(AI1, AI2, Result) :-
