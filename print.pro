@@ -24,7 +24,7 @@ print_matrix([Row|Rest], X, N) :-
     print_matrix(Rest, O, N),
     print_row(Row, O).
     
-print_column_number(N, N) :- write(N), !.
+print_column_number(N, N) :- write(N).
 print_column_number(X, N) :-
     X < N,
     write(X),
