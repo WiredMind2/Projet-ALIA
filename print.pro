@@ -1,6 +1,3 @@
-
-
-% Print player with their color
 print_player(x) :- 
     ansi_format([fg(red)], 'o', []).
 print_player(o) :- 
