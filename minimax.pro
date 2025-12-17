@@ -146,7 +146,7 @@ iaMinimax(Board, NewBoard, Player, Depth, UseAlphaBeta) :-
 
 % Minimax WITH Alpha-Beta Pruning
 % AIPlayer is the original AI (stays constant), CurrentPlayer is who's moving now
-minimax_ab(Board, LastIndex, Depth, Alpha, Beta, AIPlayer, CurrentPlayer, IsMaximizing, ValidMoves, BestCol, BestScore) :-
+minimax_ab(Board, _LastIndex, Depth, _Alpha, _Beta, AIPlayer, _CurrentPlayer, _IsMaximizing, _ValidMoves, BestCol, BestScore) :-
     ( Depth = 0 ; is_terminal(Board) ),
     !,
     evaluate_board(Board, AIPlayer, BestScore),
@@ -211,7 +211,7 @@ minimize_moves([Col|Rest], Board, LastIndex, Depth, Alpha, Beta, AIPlayer, Curre
     ).
 
 % Minimax WITHOUT Alpha-Beta Pruning
-minimax_no_ab(Board, LastIndex, Depth, AIPlayer, CurrentPlayer, IsMaximizing, ValidMoves, BestCol, BestScore) :-
+minimax_no_ab(Board, _LastIndex, Depth, AIPlayer, _CurrentPlayer, _IsMaximizing, _ValidMoves, BestCol, BestScore) :-
     ( Depth = 0 ; is_terminal(Board) ),
     !,
     evaluate_board(Board, AIPlayer, BestScore),

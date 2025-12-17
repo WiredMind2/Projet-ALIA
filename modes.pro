@@ -79,8 +79,6 @@ playHumanMove(Board,NewBoard,Player) :-
             playMove(Board, ColIndex, TmpBoard, Player, LastIndex, NewLastIndex),
             NewBoard = TmpBoard,
             applyLastIndex(LastIndex, NewLastIndex),
-            write('Dropping in column '), write(Col), nl,
-            write('Updated Indices: '), writeln(NewLastIndex),
             true
         ;   writeln('Column is full, pick another.'),
             playHumanMove(Board,NewBoard,Player)
