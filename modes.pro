@@ -3,6 +3,7 @@
 :- consult('ia.pro').
 :- consult('minimax.pro').
 
+/*************** Player vs Player Mode ***************/
 play(Player):-  
     write('New turn for: '),
     print_player(Player),
@@ -21,6 +22,7 @@ play(Player):-
         play(NextPlayer)
     ).
 
+/*************** Player vs AI Mode ***************/
 play_pvai(Player) :-  % Player 'x' = human, 'o' = IA
     play_pvai(Player, minimax, 7, true).
 
@@ -43,7 +45,7 @@ play_pvai(Player, AIType, Depth, UseAlphaBeta) :-
         play_pvai(NextPlayer, AIType, Depth, UseAlphaBeta)
     ).
 
-% Make AI move based on type
+% Make AI move based on AI type
 make_ai_move(Board, NewBoard, Player, random, _Depth, _UseAB) :-
     iaRandom(Board, NewBoard, Player).
 make_ai_move(Board, NewBoard, Player, minimax, Depth, UseAlphaBeta) :-
@@ -51,6 +53,24 @@ make_ai_move(Board, NewBoard, Player, minimax, Depth, UseAlphaBeta) :-
 make_ai_move(Board, NewBoard, Player, _, _Depth, _UseAB) :-
     iaPresqueRandom(Board, NewBoard, Player).
 
+playHumanMove(Board,NewBoard,Player) :-
+    read(Col),
+    (   integer(Col), Col >= 1, Col =< 7
+    ->  ColIndex is Col - 1,
+        (   validMove(ColIndex)
+        ->  last_index(LastIndex),
+            playMove(Board, ColIndex, TmpBoard, Player, LastIndex, NewLastIndex),
+            NewBoard = TmpBoard,
+            applyLastIndex(LastIndex, NewLastIndex),
+            true
+        ;   writeln('Column is full, pick another.'),
+            playHumanMove(Board,NewBoard,Player)
+        )
+    ;   writeln('Invalid input, enter a number between 1 and 7.'),
+        playHumanMove(Board,NewBoard,Player)
+    ).
+
+/*************** AI vs AI Mode ***************/
 play_aivai(Player) :-  % Player 'x' = IA, 'o' = IA
     write('New turn for: '), print_player(Player), nl,
     board(Board),
@@ -68,21 +88,4 @@ play_aivai(Player) :-  % Player 'x' = IA, 'o' = IA
     ;
         changePlayer(Player,NextPlayer),
         play_aivai(NextPlayer)
-    ).
-
-playHumanMove(Board,NewBoard,Player) :-
-    read(Col),
-    (   integer(Col), Col >= 1, Col =< 7
-    ->  ColIndex is Col - 1,
-        (   validMove(ColIndex)
-        ->  last_index(LastIndex),
-            playMove(Board, ColIndex, TmpBoard, Player, LastIndex, NewLastIndex),
-            NewBoard = TmpBoard,
-            applyLastIndex(LastIndex, NewLastIndex),
-            true
-        ;   writeln('Column is full, pick another.'),
-            playHumanMove(Board,NewBoard,Player)
-        )
-    ;   writeln('Invalid input, enter a number between 1 and 7.'),
-        playHumanMove(Board,NewBoard,Player)
     ).
