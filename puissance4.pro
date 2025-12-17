@@ -18,25 +18,18 @@ main_menu :-
 
 handle_choice(1) :-
     write('\nStarting Player vs Player...'), nl,
-    (   catch(play('x'), Error, (handle_error(Error), fail))
-    ->  true
-    ;   writeln('Game ended unexpectedly.'), main_menu
-    ).
+    play('x').
 handle_choice(2) :-
     ai_menu.
 
 handle_choice(3) :-
     write('Starting IA vs IA...'), nl,
-    (   catch(play_aivai('x'), Error, (handle_error(Error), fail))
-    ->  true
-    ;   writeln('Game ended unexpectedly.'), main_menu
-    ).
+    play_aivai('x').
+
 handle_choice(4) :-
     write('Starting Tournament...'), nl,
-    (   catch(run_tournament('tournament_config.pl'), Error, (handle_error(Error), fail))
-    ->  main_menu
-    ;   writeln('Tournament ended unexpectedly.'), main_menu
-    ).
+    run_tournament('tournament_config.pl').
+
 handle_choice(q) :-
     writeln('Goodbye.').
 
@@ -87,10 +80,7 @@ handleAiTypeChoice(_) :-
 
 start_pvai_game(IAType, Depth, UseAlphaBeta) :-
     write('Starting Player vs IA (you go first)...'), nl,
-    (   catch(play_pvai('x', IAType, Depth, UseAlphaBeta), Error, (handle_error(Error), fail))
-    ->  true
-    ;   writeln('Game ended unexpectedly.'), main_menu
-    ).
+    play_pvai('x', IAType, Depth, UseAlphaBeta).
 
 handle_error(Error) :-
     format('Error occurred: ~w~n', [Error]),
