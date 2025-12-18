@@ -1,4 +1,4 @@
-% Tournament Engine - Simplified
+% Tournament Engine
 :- consult('game.pro').
 :- consult('ia.pro').
 :- consult('minimax.pro').
@@ -29,7 +29,7 @@ run_matches(IDs) :-
 
 % Run a single match
 run_match(AI1, AI2, Player, Result) :-
-    setup,
+    setup, % Initialize board
     ai_config(AI1, T1, P1),
     ai_config(AI2, T2, P2),
     play_game(Player, AI1, T1, P1, AI2, T2, P2, Result).
